@@ -157,7 +157,7 @@ async function loadOverview() {
   const start = f.chat_start || 0;
   const pct = (n) => start ? ` <small>${Math.round(100 * n / start)}%</small>` : '';
   const tiles = [
-    ['Chat gestartet', start, ''], ['Chat abgeschlossen', f.chat_done || 0, pct(f.chat_done || 0)],
+    ['Quiz gestartet', start, ''], ['Quiz abgeschlossen', f.chat_done || 0, pct(f.chat_done || 0)],
     ['Sitzungen mit Like', f.swipe_like || 0, pct(f.swipe_like || 0)], ['Mission geöffnet', f.mission_open || 0, pct(f.mission_open || 0)],
     ['Buchungen', total.gebucht, pct(total.gebucht)], ['Check-ins', total.qualifiziert, ` <small>${total.checkin_quote}% der Buchungen</small>`],
   ];

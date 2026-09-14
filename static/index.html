@@ -50,30 +50,33 @@
   .step b { display: block; }
   .step small { color: var(--muted); }
 
-  /* chat */
-  .progress { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; flex: 1; }
-  .progress i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
-  .messages { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
-  .msg { max-width: 85%; padding: 12px 15px; border-radius: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .msg.bot { background: var(--surface2); border-bottom-left-radius: 6px; align-self: flex-start; }
-  .msg.user { background: var(--accent); color: var(--ink); border-bottom-right-radius: 6px; align-self: flex-end; font-weight: 500; }
-  .tip { padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--accent); }
-  .tip p { margin: 6px 0 0; white-space: pre-wrap; }
-  .typing:empty::after { content: ""; display: inline-block; width: 36px; height: 10px;
-    background: radial-gradient(circle, var(--muted) 3px, transparent 4px) 0 50% / 12px 10px repeat-x; animation: blink 1s infinite; }
-  @keyframes blink { 50% { opacity: .3; } }
-  .chat-bottom { position: sticky; bottom: 0; display: grid; gap: 10px; padding: 14px 0 4px;
-    background: linear-gradient(transparent, var(--bg) 22%); }
-  .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
-  .chip { flex: none; border: 1px solid var(--line); background: var(--surface); color: var(--text);
-    border-radius: 999px; padding: 9px 14px; font-size: 14px; cursor: pointer; }
-  .chip:hover { border-color: var(--accent); }
-  .composer { display: flex; gap: 8px; }
-  .composer input { flex: 1; min-width: 0; background: var(--surface); border: 1px solid var(--line); color: var(--text);
-    border-radius: 999px; padding: 14px 18px; font: inherit; }
-  .composer input:focus, .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .send { width: 52px; height: 52px; flex: none; border-radius: 50%; border: 0; background: var(--accent); color: var(--ink); font-size: 20px; cursor: pointer; }
-  .send:disabled { opacity: .5; }
+  /* quiz */
+  .dots { display: flex; gap: 6px; flex: 1; justify-content: center; }
+  .dots i { width: 26px; height: 6px; border-radius: 99px; background: var(--surface2); transition: background .3s; }
+  .dots i.on { background: var(--accent); }
+  .quiz-q { font-size: clamp(28px, 8vw, 34px); margin-top: 6px; }
+  .quiz-hint { margin: -6px 0 0; }
+  .enter { animation: slide .28s ease; }
+  @keyframes slide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 136px;
+    padding: 16px; border-radius: 22px; border: 1px solid var(--line); background: var(--surface); color: var(--text);
+    text-align: left; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
+  .tile:hover { border-color: #3a4358; }
+  .tile:active { transform: scale(.96); }
+  .tile .emo { font-size: 36px; line-height: 1; margin-bottom: auto; }
+  .tile b { font-size: 16px; line-height: 1.2; margin-top: 12px; }
+  .tile small { color: var(--muted); font-size: 13px; }
+  .tile.on { border-color: var(--accent); background: linear-gradient(160deg, rgba(198,255,61,.18), var(--surface) 70%); }
+  .tile.on::after { content: "✓"; position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: var(--ink); font-weight: 900; font-size: 14px; display: grid; place-items: center; }
+  .slider-box { display: grid; gap: 18px; padding: 28px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; text-align: center; }
+  .slider-value { font-size: clamp(36px, 11vw, 46px); font-weight: 800; letter-spacing: -.03em; color: var(--accent); }
+  .slider-box input { width: 100%; accent-color: var(--accent); height: 32px; cursor: pointer; }
+  .slider-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .preset { border: 1px solid var(--line); background: var(--surface2); color: var(--text); border-radius: 99px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
+  .preset:hover { border-color: var(--accent); }
 
   /* loading */
   .loader { flex: 1; display: grid; place-items: center; align-content: center; gap: 14px; text-align: center; padding: 40px 10px; }
@@ -104,10 +107,6 @@
   .photo svg { display: none; }
   .photo.broken img, .photo.broken figcaption { display: none; }
   .photo.broken svg { display: block; width: 100%; height: 100%; }
-  .thumb { overflow: hidden; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; }
-  .hero-img { width: 100%; height: 170px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; }
-  .credit { font-size: 11px; color: rgba(255,255,255,.75); }
   .card h3 { margin: 0; font-size: 32px; letter-spacing: -.03em; line-height: 1.05; }
   .sub { color: rgba(255,255,255,.75); font-size: 14px; }
   .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -133,8 +132,9 @@
   .match { display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--surface); border: 1px solid var(--line);
     border-radius: 20px; cursor: pointer; text-align: left; color: inherit; width: 100%; }
   .match:hover { border-color: var(--accent); }
-  .thumb { width: 76px; height: 56px; border-radius: 14px; background: linear-gradient(160deg, var(--c1), var(--c2)); flex: none; display: grid; place-items: center; }
+  .thumb { width: 76px; height: 56px; border-radius: 14px; background: linear-gradient(160deg, var(--c1), var(--c2)); flex: none; display: grid; place-items: center; overflow: hidden; }
   .thumb svg { width: 66px; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
   .match b { display: block; }
   .match small { color: var(--muted); }
   .match .go { margin-left: auto; color: var(--accent); font-weight: 700; white-space: nowrap; }
@@ -142,6 +142,10 @@
   /* mission */
   .hero-car { border-radius: 24px; padding: 18px; background: linear-gradient(160deg, var(--c1), var(--c2)); display: grid; gap: 4px; }
   .hero-car h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+  .hero-img { width: 100%; height: 170px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; }
+  .credit { font-size: 11px; color: rgba(255,255,255,.75); }
+  .tip { padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--accent); }
+  .tip p { margin: 6px 0 0; }
   .mission { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
   .mission label { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; cursor: pointer; }
   .mission input { appearance: none; width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--line); flex: none; margin: 1px 0 0; display: grid; place-items: center; cursor: pointer; }
@@ -162,6 +166,7 @@
   .slot.active { background: var(--accent); color: var(--ink); border-color: var(--accent); }
   .field { display: grid; gap: 6px; }
   .field input { background: var(--surface); border: 1px solid var(--line); color: var(--text); border-radius: 14px; padding: 14px; font: inherit; }
+  .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); cursor: pointer; }
   .consent input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 2px 0 0; }
   .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
@@ -188,14 +193,14 @@
   <section class="view" id="v-start">
     <div class="topbar">
       <div class="logo">match<span>&amp;</span>meet</div>
-      <span class="badge" id="ai-status">Prototyp</span>
+      <span class="badge" id="status">Prototyp</span>
     </div>
     <div class="hero">
       <h1>Swipe dich zu deinem <em>nächsten Auto.</em></h1>
-      <p>6 Fragen, alle Marken, eine Probefahrt mit Plan. Ohne Verkaufsdruck.</p>
+      <p>30 Sekunden tippen, alle Marken, eine Probefahrt mit Plan. Ohne Verkaufsdruck.</p>
     </div>
     <div class="steps">
-      <div class="step"><div class="ico">💬</div><div><b>Erzähl von deinem Alltag</b><small>6 kurze Fragen, antippen reicht</small></div></div>
+      <div class="step"><div class="ico">👆</div><div><b>Tipp dich durch deinen Alltag</b><small>6 Fragen, keine Tipparbeit</small></div></div>
       <div class="step"><div class="ico">🔥</div><div><b>Swipe deine Matches</b><small>Passende Modelle aller Marken</small></div></div>
       <div class="step"><div class="ico">🗺️</div><div><b>Probefahrt-Mission</b><small>Dein persönlicher Testplan beim Händler</small></div></div>
     </div>
@@ -204,22 +209,18 @@
     <p class="fineprint">🔒 Dein Profil geht nur mit deiner Zustimmung an die Garage.<br>Prototyp mit Beispieldaten.</p>
   </section>
 
-  <!-- 2 Chat -->
-  <section class="view" id="v-chat" hidden>
+  <!-- 2 Quiz -->
+  <section class="view" id="v-quiz" hidden>
     <div class="topbar">
-      <button class="link" data-go="v-start" aria-label="Zurück">←</button>
-      <div class="progress"><i id="progress"></i></div>
-      <span class="muted" id="progress-label">0/6</span>
+      <button class="link" id="quiz-back" aria-label="Zurück">←</button>
+      <div class="dots" id="dots"></div>
+      <span class="muted" id="quiz-count">1/6</span>
     </div>
-    <div class="messages" id="messages"></div>
-    <div class="chat-bottom">
-      <div class="chips" id="chips"></div>
-      <form class="composer" id="chat-form">
-        <input id="answer" autocomplete="off" placeholder="Deine Antwort …" maxlength="300">
-        <button class="send" id="send" aria-label="Senden">↑</button>
-      </form>
-      <button class="btn" id="to-matches" hidden>Meine Matches zeigen ✨</button>
-    </div>
+    <h2 class="title quiz-q" id="quiz-q"></h2>
+    <p class="muted quiz-hint" id="quiz-hint"></p>
+    <div id="quiz-body"></div>
+    <div class="spacer"></div>
+    <button class="btn" id="quiz-next" hidden>Weiter</button>
   </section>
 
   <!-- Loading -->
@@ -253,7 +254,7 @@
       <button class="link" id="reswipe">Nochmal swipen</button>
     </div>
     <h2 class="title">Deine Matches 🔥</h2>
-    <p class="muted" id="matches-note">Wähle ein Auto und die KI plant deine Probefahrt.</p>
+    <p class="muted" id="matches-note">Wähle ein Auto für deine Probefahrt-Mission.</p>
     <div class="list" id="match-list"></div>
   </section>
 
@@ -307,17 +308,20 @@
 
 <script>
 const $ = (sel) => document.querySelector(sel);
-const state = { topics: [], step: 0, answers: [], busy: false, done: false,
+const state = { quiz: [], step: 0, selection: {}, advancing: false,
                 profile: null, cars: [], index: 0, liked: [], animating: false,
                 car: null, mission: [], dealer: null, slot: null };
 
 const PARKEN = { eng: 'Enge Tiefgarage', strasse: 'Parkt an der Strasse', eigener_platz: 'Eigener Parkplatz' };
 const LADEN = { zuhause: 'Laden zuhause', arbeit: 'Laden bei der Arbeit', nein: 'Keine Lademöglichkeit' };
+const BUDGET_PRESETS = [25000, 40000, 60000];
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 const chf = (n) => 'CHF ' + Number(n).toLocaleString('de-CH');
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
 async function api(path, body) {
   const opts = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
@@ -328,6 +332,11 @@ async function api(path, body) {
     throw new Error(msg);
   }
   return r.json();
+}
+
+// Funnel tracking for the developer console; failures must never disturb the customer.
+function track(typ) {
+  fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ typ, sid }) }).catch(() => {});
 }
 
 function show(id) {
@@ -351,7 +360,7 @@ function setLoading(title, sub) {
 function carColors(car) { return `--c1:${car.farbe[0]};--c2:${car.farbe[1]}`; }
 
 function carSvg(car) {
-  const tall = /SUV|Crossover/.test(car.segment) ? 'transform="translate(0 90) scale(1 1.14) translate(0 -90)"' : '';
+  const tall = /SUV|Crossover|Van/.test(car.segment) ? 'transform="translate(0 90) scale(1 1.14) translate(0 -90)"' : '';
   return `<svg viewBox="0 0 300 116" aria-hidden="true">
     <ellipse cx="154" cy="110" rx="132" ry="5" fill="rgba(0,0,0,.35)"/>
     <g ${tall}>
@@ -383,7 +392,7 @@ function carFacts(car) {
 
 function profileTags(p) {
   const t = [];
-  if (p.budget_max_chf) t.push('bis ' + chf(p.budget_max_chf));
+  t.push(p.budget_max_chf ? 'bis ' + chf(p.budget_max_chf) : 'Budget offen');
   if (p.km_pro_tag) t.push(p.km_pro_tag + ' km/Tag');
   if (PARKEN[p.parken]) t.push(PARKEN[p.parken]);
   if (LADEN[p.laden]) t.push(LADEN[p.laden]);
@@ -392,105 +401,109 @@ function profileTags(p) {
   return t;
 }
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-const sid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+/* ---------- quiz ---------- */
 
-// Funnel tracking for the developer console; failures must never disturb the customer.
-function track(typ) {
-  fetch('/api/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ typ, sid }) }).catch(() => {});
-}
-
-/* ---------- chat ---------- */
-
-function addMsg(role, text) {
-  const d = document.createElement('div');
-  d.className = 'msg ' + role;
-  d.textContent = text;
-  $('#messages').append(d);
-  d.scrollIntoView({ block: 'end', behavior: 'smooth' });
-  return d;
-}
-
-function renderChips() {
-  const box = $('#chips');
-  box.innerHTML = '';
-  const topic = state.topics[state.step];
-  if (!topic || state.done) return;
-  topic.chips.forEach(text => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'chip'; b.textContent = text;
-    b.onclick = () => sendAnswer(text);
-    box.append(b);
-  });
-}
-
-function updateProgress() {
-  const total = state.topics.length;
-  $('#progress').style.width = (100 * state.step / total) + '%';
-  $('#progress-label').textContent = `${state.step}/${total}`;
-}
-
-function startChat() {
-  Object.assign(state, { step: 0, answers: [], done: false, busy: false });
-  $('#messages').innerHTML = '';
-  $('#chat-form').hidden = false;
-  $('#to-matches').hidden = true;
-  show('v-chat');
+function startQuiz() {
+  Object.assign(state, { step: 0, selection: {}, advancing: false });
   track('chat_start');
-  addMsg('bot', state.topics[0].frage);
-  renderChips();
-  updateProgress();
-  $('#answer').focus();
+  show('v-quiz');
+  renderStep();
 }
 
-async function sendAnswer(text) {
-  text = text.trim();
-  if (!text || state.busy || state.done) return;
-  state.busy = true;
-  $('#send').disabled = true;
-  const topic = state.topics[state.step];
-  addMsg('user', text);
-  state.answers.push({ key: topic.key, frage: topic.frage, antwort: text });
-  $('#answer').value = '';
-  $('#chips').innerHTML = '';
+function renderStep() {
+  const step = state.quiz[state.step];
+  const total = state.quiz.length;
+  const last = state.step === total - 1;
+  $('#dots').innerHTML = state.quiz.map((_, i) => `<i class="${i <= state.step ? 'on' : ''}"></i>`).join('');
+  $('#quiz-count').textContent = `${state.step + 1}/${total}`;
+  $('#quiz-q').textContent = step.frage;
+  $('#quiz-hint').textContent = step.hinweis || '';
+  $('#quiz-hint').hidden = !step.hinweis;
+  $('#quiz-next').textContent = last ? 'Meine Matches zeigen ✨' : 'Weiter';
 
-  const bubble = addMsg('bot typing', '');
-  try {
-    // Short typing pause so the guided chat reads like a conversation.
-    const [r] = await Promise.all([api('/api/chat', { step: state.step, answer: text }), wait(700)]);
-    bubble.textContent = r.text;
-  } catch (e) {
-    const next = state.topics[state.step + 1];
-    bubble.textContent = next ? next.frage : 'Danke! Ich suche jetzt passende Modelle.';
+  const body = $('#quiz-body');
+  body.classList.remove('enter');
+  void body.offsetWidth; // restart the slide-in animation
+  body.classList.add('enter');
+
+  if (step.typ === 'slider') {
+    const value = state.selection[step.key] ?? step.default;
+    body.innerHTML = `<div class="slider-box">
+      <div class="slider-value" id="slider-value"></div>
+      <input type="range" id="slider" min="${step.min}" max="${step.max}" step="${step.step}" value="${value}" aria-label="Budget">
+      <div class="slider-scale"><span>${chf(step.min)}</span><span>offen</span></div>
+      <div class="presets">${BUDGET_PRESETS.map(v => `<button type="button" class="preset" data-v="${v}">${chf(v)}</button>`).join('')}</div>
+    </div>`;
+    const update = () => {
+      const v = Number($('#slider').value);
+      state.selection[step.key] = v;
+      $('#slider-value').textContent = v >= step.max ? 'Budget offen' : 'bis ' + chf(v);
+    };
+    $('#slider').oninput = update;
+    body.querySelectorAll('.preset').forEach(b => b.onclick = () => { $('#slider').value = b.dataset.v; update(); });
+    update();
+    $('#quiz-next').hidden = false;
+    return;
   }
-  bubble.classList.remove('typing');
-  bubble.scrollIntoView({ block: 'end', behavior: 'smooth' });
 
-  state.step++;
-  updateProgress();
-  if (state.step >= state.topics.length) {
-    state.done = true;
-    track('chat_done');
-    $('#chat-form').hidden = true;
-    $('#to-matches').hidden = false;
-    $('#to-matches').scrollIntoView({ block: 'end', behavior: 'smooth' });
+  const chosen = state.selection[step.key];
+  body.innerHTML = `<div class="tiles">${step.optionen.map(o => {
+    const on = step.typ === 'multi' ? (chosen || []).includes(o.id) : chosen === o.id;
+    return `<button type="button" class="tile${on ? ' on' : ''}" data-id="${esc(o.id)}" aria-pressed="${on}">
+      <span class="emo">${esc(o.emoji)}</span><b>${esc(o.text)}</b>${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</button>`;
+  }).join('')}</div>`;
+  body.querySelectorAll('.tile').forEach(tile => tile.onclick = () => pick(step, tile));
+  $('#quiz-next').hidden = step.typ !== 'multi';
+}
+
+function pick(step, tile) {
+  const id = tile.dataset.id;
+  if (step.typ === 'multi') {
+    const list = state.selection[step.key] || [];
+    if (!list.includes(id) && list.length >= step.max) return toast(`Maximal ${step.max} auswählen`);
+    state.selection[step.key] = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+    tile.classList.toggle('on');
+    tile.setAttribute('aria-pressed', tile.classList.contains('on'));
+    return;
+  }
+  if (state.advancing) return;
+  state.advancing = true;
+  state.selection[step.key] = id;
+  document.querySelectorAll('#quiz-body .tile').forEach(t => {
+    t.classList.toggle('on', t === tile);
+    t.setAttribute('aria-pressed', t === tile);
+  });
+  // Short pause so the tap feedback is visible before the next question slides in.
+  setTimeout(() => { state.advancing = false; nextStep(); }, 280);
+}
+
+function nextStep() {
+  if (state.step < state.quiz.length - 1) {
+    state.step++;
+    renderStep();
   } else {
-    renderChips();
-    $('#answer').focus();
+    track('chat_done');
+    findMatches();
   }
-  state.busy = false;
-  $('#send').disabled = false;
+}
+
+function prevStep() {
+  if (state.step > 0) {
+    state.step--;
+    renderStep();
+  } else {
+    show('v-start');
+  }
 }
 
 /* ---------- matching & swipe ---------- */
 
 async function findMatches() {
   show('v-loading');
-  setLoading('Analysiere dein Profil …', 'Alle Marken, passend zu deinem Alltag');
+  setLoading('Suche deine Matches …', 'Alle Marken, passend zu deinem Alltag');
   try {
-    const p = await api('/api/profile', { answers: state.answers });
+    const [p] = await Promise.all([api('/api/profile', { auswahl: state.selection }), wait(700)]);
     state.profile = p.profil;
-    setLoading('Suche Matches aller Marken …', profileTags(state.profile).join(' · '));
     const m = await api('/api/matches', { profile: state.profile });
     Object.assign(state, { cars: m.cars, index: 0, liked: [] });
     $('#profile-tags').innerHTML = profileTags(state.profile).map(t => `<span>${esc(t)}</span>`).join('');
@@ -498,7 +511,7 @@ async function findMatches() {
     show('v-swipe');
   } catch (e) {
     toast(e.message);
-    show('v-chat');
+    show('v-quiz');
   }
 }
 
@@ -577,7 +590,7 @@ function finishSwipe() {
     list = state.cars.slice(0, 3);
     $('#matches-note').textContent = 'Kein Herz vergeben, hier sind deine Top 3 laut Profil. Wähle eins für die Mission.';
   } else {
-    $('#matches-note').textContent = 'Wähle ein Auto und die KI plant deine Probefahrt.';
+    $('#matches-note').textContent = 'Wähle ein Auto für deine Probefahrt-Mission.';
   }
   $('#match-list').innerHTML = '';
   list.forEach(car => {
@@ -613,9 +626,9 @@ async function openMission(car) {
     state.mission = [];
     toast(e.message);
   }
-  $('#mission-car').style.cssText = carColors(car);
   const photo = car.bild_url ? `<img class="hero-img" src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" onerror="this.remove()">` : '';
   const credit = car.bild_link ? `<a class="credit" href="${esc(car.bild_link)}" target="_blank" rel="noopener">${esc(car.bild_quelle)}</a>` : '';
+  $('#mission-car').style.cssText = carColors(car);
   $('#mission-car').innerHTML = `${photo}<span class="brand">${esc(car.marke)} · ${car.match_pct}% Match</span>
     <h2>${esc(car.modell)}</h2><div class="sub">${esc(car.antrieb)} · ${chf(car.preis_chf)}</div>${credit}`;
   $('#mission-list').innerHTML = missionHtml(state.mission, 'm');
@@ -697,9 +710,9 @@ function renderTicket(b) {
 /* ---------- wiring ---------- */
 
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
-$('#start-btn').onclick = startChat;
-$('#chat-form').onsubmit = (e) => { e.preventDefault(); sendAnswer($('#answer').value); };
-$('#to-matches').onclick = findMatches;
+$('#start-btn').onclick = startQuiz;
+$('#quiz-back').onclick = prevStep;
+$('#quiz-next').onclick = nextStep;
 $('#like-btn').onclick = () => decide(true);
 $('#nope-btn').onclick = () => decide(false);
 $('#reswipe').onclick = () => { Object.assign(state, { index: 0, liked: [] }); renderStack(); show('v-swipe'); };
@@ -714,11 +727,10 @@ document.addEventListener('keydown', (e) => {
 
 (async () => {
   try {
-    const t = await api('/api/topics');
-    state.topics = t.topics;
+    state.quiz = (await api('/api/quiz')).quiz;
     $('#start-btn').disabled = false;
   } catch (e) {
-    $('#ai-status').textContent = 'Server nicht erreichbar';
+    $('#status').textContent = 'Server nicht erreichbar';
   }
 })();
 </script>

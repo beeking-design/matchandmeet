@@ -243,114 +243,63 @@ def require_admin(request: Request):
 
 # ---------- advisor (rule-based; LLM seam for later) ----------
 
-TOPICS = [
-    {"key": "alltag", "frage": "Hi! 👋 Wofür brauchst du das Auto im Alltag und wie viele Kilometer fährst du an einem normalen Tag?",
-     "chips": ["Pendeln, ca. 40 km", "Stadt, unter 20 km", "Viel Autobahn, 100+ km"]},
-    {"key": "budget", "frage": "Mit welchem Budget rechnest du ungefähr (Kaufpreis in CHF)?",
-     "chips": ["bis 30'000", "30'000–45'000", "45'000–60'000"]},
-    {"key": "parken", "frage": "Wo parkst du meistens: enge Tiefgarage, an der Strasse oder auf einem eigenen Platz?",
-     "chips": ["Enge Tiefgarage", "An der Strasse", "Eigener Parkplatz"]},
-    {"key": "laden", "frage": "Könntest du zuhause oder bei der Arbeit laden?",
-     "chips": ["Ja, Wallbox möglich", "Bei der Arbeit", "Nein, keine Lademöglichkeit"]},
-    {"key": "platz", "frage": "Wer fährt meistens mit und was muss regelmässig in den Kofferraum?",
-     "chips": ["Meist allein", "Partner:in + Sporttasche", "Familie mit Kinderwagen"]},
-    {"key": "fragen", "frage": "Letzte Frage: Was ist deine grösste offene Frage oder Sorge beim Autokauf?",
-     "chips": ["Reicht die Reichweite im Winter?", "Was kostet mich das Auto im Monat?", "Passt es in meine Garage?"]},
+QUIZ = [
+    {"key": "alltag", "typ": "single", "frage": "Wie sieht dein Alltag mit dem Auto aus?", "optionen": [
+        {"id": "stadt", "emoji": "🏙️", "text": "Kurze Stadtwege", "sub": "unter 20 km am Tag", "profil": {"nutzung": "Kurze Stadtwege", "km_pro_tag": 15}},
+        {"id": "pendeln", "emoji": "🚆", "text": "Pendeln", "sub": "rund 40 km am Tag", "profil": {"nutzung": "Pendeln", "km_pro_tag": 40}},
+        {"id": "autobahn", "emoji": "🛣️", "text": "Viel Autobahn", "sub": "100 km und mehr", "profil": {"nutzung": "Viel Autobahn", "km_pro_tag": 110}},
+        {"id": "touren", "emoji": "🏔️", "text": "Wochenend-Touren", "sub": "unter der Woche wenig", "profil": {"nutzung": "Wochenend-Touren", "km_pro_tag": 25}},
+    ]},
+    {"key": "budget", "typ": "slider", "frage": "Wie viel darf dein Auto kosten?", "hinweis": "Kaufpreis, ungefähr reicht.",
+     "min": 15000, "max": 90000, "step": 1000, "default": 40000},
+    {"key": "parken", "typ": "single", "frage": "Wo parkst du meistens?", "optionen": [
+        {"id": "eng", "emoji": "🅿️", "text": "Enge Tiefgarage", "profil": {"parken": "eng"}},
+        {"id": "strasse", "emoji": "🏘️", "text": "An der Strasse", "profil": {"parken": "strasse"}},
+        {"id": "eigen", "emoji": "🏠", "text": "Eigener Platz", "profil": {"parken": "eigener_platz"}},
+        {"id": "wechselnd", "emoji": "🤷", "text": "Mal so, mal so", "profil": {"parken": "unklar"}},
+    ]},
+    {"key": "laden", "typ": "single", "frage": "Könntest du ein E-Auto laden?", "optionen": [
+        {"id": "zuhause", "emoji": "🔌", "text": "Zuhause", "sub": "Wallbox oder Steckdose", "profil": {"laden": "zuhause"}},
+        {"id": "arbeit", "emoji": "🏢", "text": "Bei der Arbeit", "profil": {"laden": "arbeit"}},
+        {"id": "nein", "emoji": "⛽", "text": "Nein", "sub": "lieber tanken", "profil": {"laden": "nein"}},
+        {"id": "unklar", "emoji": "🤔", "text": "Weiss nicht", "profil": {"laden": "unklar"}},
+    ]},
+    {"key": "platz", "typ": "single", "frage": "Wer oder was fährt mit?", "optionen": [
+        {"id": "allein", "emoji": "🙋", "text": "Meist nur ich", "profil": {"personen": 1, "grosser_kofferraum": False, "gepaeck": "Meist allein"}},
+        {"id": "zweit", "emoji": "👫", "text": "Zu zweit", "profil": {"personen": 2, "grosser_kofferraum": False, "gepaeck": "Zu zweit"}},
+        {"id": "familie", "emoji": "👨‍👩‍👧", "text": "Familie", "sub": "mit Kinderwagen & Co.", "profil": {"personen": 4, "grosser_kofferraum": True, "gepaeck": "Familie mit Kinderwagen"}},
+        {"id": "hobby", "emoji": "🐕", "text": "Hund & Hobby", "sub": "Velo, Ski, Sporttasche", "profil": {"personen": 2, "grosser_kofferraum": True, "gepaeck": "Hund, Velo oder Sportsachen"}},
+    ]},
+    {"key": "fragen", "typ": "multi", "max": 3, "frage": "Was willst du bei der Probefahrt klären?",
+     "hinweis": "Bis zu 3 antippen. Daraus entsteht deine Probefahrt-Mission.", "optionen": [
+        {"id": "winter", "emoji": "❄️", "text": "Reichweite im Winter", "frage": "Reicht die Reichweite im Winter?"},
+        {"id": "kosten", "emoji": "💸", "text": "Kosten pro Monat", "frage": "Was kostet mich das Auto im Monat?"},
+        {"id": "garage", "emoji": "📏", "text": "Passt es in meine Garage?", "frage": "Passt es in meine Garage?"},
+        {"id": "laden", "emoji": "⚡", "text": "Laden unterwegs", "frage": "Wie lade ich unterwegs?"},
+        {"id": "platz", "emoji": "🧸", "text": "Platz auf der Rückbank", "frage": "Haben Mitfahrende hinten genug Platz?"},
+        {"id": "technik", "emoji": "📱", "text": "Handy & Technik", "frage": "Wie gut klappt die Technik mit meinem Handy?"},
+    ]},
 ]
-BIG_CARGO = r"kinderwagen|hund|velo|bike|ski|sport|familie|kinder|gross|viel"
 
 
-def parse_chf(text):
-    t = text.lower().replace("’", "").replace("'", "").replace(" ", "")
-    t = re.sub(r"(?<=\d)\.(?=\d{3}(?!\d))", "", t)
-    nums = []
-    for m in re.finditer(r"(\d+(?:[.,]\d+)?)(k|tsd|tausend)?", t):
-        value = float(m.group(1).replace(",", "."))
-        nums.append(value * 1000 if m.group(2) else value)
-    nums = [n for n in nums if n >= 5000]
-    return int(max(nums)) if nums else 0
-
-
-def parse_km(text):
-    t = text.lower()
-    m = re.search(r"(\d+)\s*\+?\s*km", t) or re.search(r"(\d+)", t)
-    if m:
-        return int(m.group(1))
-    if "stadt" in t or "kurz" in t:
-        return 15
-    if "autobahn" in t or "weit" in t:
-        return 100
-    return 0
-
-
-def parse_parken(text):
-    t = text.lower()
-    if re.search(r"tiefgarage|eng|schmal|parkhaus", t):
-        return "eng"
-    if re.search(r"strasse|straße|blaue zone|quartier", t):
-        return "strasse"
-    if re.search(r"eigen|garage|carport|einfahrt|platz|hof", t):
-        return "eigener_platz"
-    return "unklar"
-
-
-def parse_laden(text):
-    t = text.lower()
-    if re.search(r"arbeit|büro|job|geschäft|firma", t):
-        return "arbeit"
-    if re.search(r"\b(nein|kein|keine|nicht)\b", t):
-        return "nein"
-    if re.search(r"\bja\b|wallbox|zuhause|daheim|garage|steckdose|solar", t):
-        return "zuhause"
-    return "unklar"
-
-
-def parse_personen(text):
-    t = text.lower()
-    m = re.search(r"(\d+)", t)
-    if m:
-        n = int(m.group(1))
-        return n + 2 if "kind" in t else n
-    if re.search(r"familie|kinder|kind", t):
-        return 4
-    if re.search(r"partner|freund|zu zweit|zwei", t):
-        return 2
-    if re.search(r"allein|solo|nur ich", t):
-        return 1
-    return 0
-
-
-def rule_profile(a):
-    alltag, budget, parken, laden, platz, fragen = (a.get(k, "") for k in ("alltag", "budget", "parken", "laden", "platz", "fragen"))
-    return {
-        "nutzung": alltag[:80], "km_pro_tag": parse_km(alltag), "budget_max_chf": parse_chf(budget),
-        "parken": parse_parken(parken), "laden": parse_laden(laden), "personen": parse_personen(platz),
-        "grosser_kofferraum": bool(re.search(BIG_CARGO, platz.lower())), "gepaeck": platz[:80],
-        "offene_fragen": [fragen[:120]] if fragen else [],
-    }
-
-
-def react(key, answer):
-    """Short, answer-aware reaction so the guided chat feels like a conversation."""
-    if key == "alltag":
-        km = parse_km(answer)
-        if km >= 100:
-            return f"{km} km pro Tag sind eine Ansage, da zählen Reichweite und Komfort."
-        return f"{km} km pro Tag schafft heute fast jedes Auto locker." if km else "Danke, das hilft mir weiter."
-    if key == "budget":
-        budget = parse_chf(answer)
-        return f"Bis {chf(budget)} gibt es spannende Optionen." if budget else "Kein Problem, ich zeige dir eine breite Auswahl."
-    if key == "parken":
-        return {"eng": "Enge Tiefgaragen merke ich mir, da zählt jeder Zentimeter.",
-                "strasse": "An der Strasse sind kompakte Autos ein Vorteil.",
-                "eigener_platz": "Ein eigener Platz macht vieles einfacher."}.get(parse_parken(answer), "Alles klar.")
-    if key == "laden":
-        return {"zuhause": "Laden zuhause ist die günstigste Art, elektrisch zu fahren.",
-                "arbeit": "Laden bei der Arbeit ist super praktisch.",
-                "nein": "Kein Problem, dann schaue ich auch auf Hybride und schnelles Laden unterwegs."}.get(parse_laden(answer), "Verstanden.")
-    if key == "platz":
-        return "Dann achte ich auf genug Kofferraum." if re.search(BIG_CARGO, answer.lower()) else "Gut zu wissen."
-    return "Gute Frage, die kommt in deine Probefahrt-Mission!"
+def build_profile(selection):
+    """Turn the tapped quiz answers into the customer profile (server-side, so unknown ids are ignored)."""
+    profile = {"nutzung": "", "km_pro_tag": 0, "budget_max_chf": 0, "parken": "unklar", "laden": "unklar",
+               "personen": 0, "grosser_kofferraum": False, "gepaeck": "", "offene_fragen": []}
+    for step in QUIZ:
+        value = selection.get(step["key"])
+        if step["typ"] == "slider":
+            # The top end of the slider means "budget open".
+            if isinstance(value, (int, float)) and not isinstance(value, bool) and value < step["max"]:
+                profile["budget_max_chf"] = int(max(value, step["min"]))
+        elif step["typ"] == "single":
+            option = next((o for o in step["optionen"] if o["id"] == value), None)
+            if option:
+                profile.update(option["profil"])
+        else:
+            chosen = value if isinstance(value, list) else []
+            profile["offene_fragen"] = [o["frage"] for o in step["optionen"] if o["id"] in chosen][:step["max"]]
+    return profile
 
 
 def score_car(car, p, ignore_budget=False):
@@ -579,19 +528,8 @@ async def prepare_database(request: Request, call_next):
     return await call_next(request)
 
 
-class ChatRequest(BaseModel):
-    step: int
-    answer: str
-
-
-class Answer(BaseModel):
-    key: str = ""
-    frage: str = ""
-    antwort: str = ""
-
-
 class ProfileRequest(BaseModel):
-    answers: list[Answer]
+    auswahl: dict
 
 
 class MatchRequest(BaseModel):
@@ -660,21 +598,14 @@ def page_admin():
 
 # --- customer ---
 
-@app.get("/api/topics")
-def topics():
-    return {"topics": TOPICS}
-
-
-@app.post("/api/chat")
-def chat(req: ChatRequest):
-    step = max(0, min(req.step, len(TOPICS) - 1))
-    follow = TOPICS[step + 1]["frage"] if step + 1 < len(TOPICS) else "Ich suche jetzt passende Modelle aller Marken für dich. ✨"
-    return {"text": f"{react(TOPICS[step]['key'], req.answer[:500])} {follow}"}
+@app.get("/api/quiz")
+def quiz():
+    return {"quiz": QUIZ}
 
 
 @app.post("/api/profile")
 def profile(req: ProfileRequest):
-    return {"profil": rule_profile({a.key: a.antwort.strip()[:500] for a in req.answers})}
+    return {"profil": build_profile(req.auswahl)}
 
 
 @app.post("/api/matches")

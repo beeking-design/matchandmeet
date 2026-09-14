@@ -11,8 +11,8 @@ Customer http://localhost:8000 · Garage http://localhost:8000/haendler · Devel
 ## Files
 | File | Purpose |
 |---|---|
-| `app.py` | FastAPI app: DB layer, auth, rule-based advisor (chat reactions, profile, matching, mission, tip), all APIs |
-| `static/index.html` | Customer app (start → chat → swipe → matches → mission → booking → ticket) |
+| `app.py` | FastAPI app: DB layer, auth, rule-based advisor (`QUIZ` config → `build_profile`, matching, mission, tip), all APIs |
+| `static/index.html` | Customer app (start → tap quiz → swipe → matches → mission → booking → ticket) |
 | `static/haendler.html` | Garage portal: access-code login, KPIs, check-in, bookings with customer briefing |
 | `static/admin.html` | Developer console: funnel, billing per garage/month, garages + access codes, bookings, car data |
 | `cars.json`, `dealers.json` | Seed data, copied into the DB on first start |
