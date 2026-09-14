@@ -1,0 +1,10 @@
+{
+  "hinweis": "Fiktive Haendler fuer den Prototyp.",
+  "haendler": [
+    {"id": "limmat", "name": "Garage Limmat AG", "ort": "Baden", "adresse": "Bruggerstrasse 50, 5400 Baden", "distanz_km": 2, "marken": ["CUPRA", "VW", "Škoda"]},
+    {"id": "wettingen", "name": "Stadtgarage Wettingen", "ort": "Wettingen", "adresse": "Landstrasse 12, 5430 Wettingen", "distanz_km": 4, "marken": ["BMW", "CUPRA"]},
+    {"id": "dietikon", "name": "E-Mobility Hub Dietikon", "ort": "Dietikon", "adresse": "Industriestrasse 8, 8953 Dietikon", "distanz_km": 13, "marken": ["BYD", "Kia", "VW"]},
+    {"id": "furttal", "name": "Garage Furttal", "ort": "Regensdorf", "adresse": "Watterstrasse 101, 8105 Regensdorf", "distanz_km": 17, "marken": ["Toyota", "Dacia", "Škoda"]},
+    {"id": "zuerichwest", "name": "Autocenter Zürich-West", "ort": "Zürich", "adresse": "Hohlstrasse 400, 8048 Zürich", "distanz_km": 22, "marken": ["Hyundai", "Kia", "BYD"]}
+  ]
+}

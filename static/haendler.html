@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Match & Meet – Garagenportal</title>
+<style>
+  :root {
+    --bg: #f4f5f8; --surface: #ffffff; --line: #e3e6ec; --text: #12151c; --muted: #667085;
+    --accent: #c6ff3d; --ink: #0b0d12; --ok: #0f8a45; --ok-bg: #e3f7ea; --open: #8a5a00; --open-bg: #fff3d6; --err: #c0263a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  [hidden] { display: none !important; }
+  button, input { font: inherit; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 20px 40px; display: grid; gap: 18px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--ink); color: #fff; padding: 16px 20px; border-radius: 18px; }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+  .logo span { color: var(--accent); }
+  .logo small { font-weight: 500; color: #98a2b6; margin-left: 8px; font-size: 14px; }
+  .head-right { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .link { background: none; border: 0; color: #98a2b6; cursor: pointer; padding: 4px; }
+  .link:hover { color: #fff; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .kpi span { color: var(--muted); font-size: 13px; }
+  .kpi b { display: block; font-size: 30px; letter-spacing: -.02em; margin-top: 2px; }
+  .kpi.money { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .kpi.money span { color: #98a2b6; }
+  .kpi.money b { color: var(--accent); }
+
+  #portal { display: grid; gap: 18px; }
+  .grid { display: grid; grid-template-columns: 320px 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+  .panel h2 { margin: 0; font-size: 17px; }
+  .login { width: 100%; max-width: 420px; margin: 40px auto 0; }
+  .codeinput { width: 100%; text-transform: uppercase; letter-spacing: .15em; font: 700 24px ui-monospace, Consolas, monospace;
+    padding: 12px; border: 2px solid var(--line); border-radius: 12px; text-align: center; }
+  .codeinput:focus { outline: none; border-color: var(--ink); }
+  .btn { border: 0; border-radius: 12px; padding: 13px 16px; background: var(--accent); color: var(--ink); font-weight: 700; cursor: pointer; }
+  .btn.small { padding: 8px 12px; font-size: 13px; background: var(--ink); color: #fff; }
+  .note { font-size: 13px; color: var(--muted); margin: 0; }
+  .result { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+  .result.ok { background: var(--ok-bg); color: var(--ok); }
+  .result.err { background: #fde8eb; color: var(--err); }
+
+  .bookings { display: grid; gap: 10px; }
+  .booking { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; padding: 14px 16px; }
+  .when { font-weight: 700; min-width: 120px; }
+  .who { flex: 1; min-width: 180px; }
+  .status { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+  .status.gebucht { background: var(--open-bg); color: var(--open); }
+  .status.qualifiziert { background: var(--ok-bg); color: var(--ok); }
+  .code { font-family: ui-monospace, Consolas, monospace; color: var(--muted); font-size: 13px; }
+  details { border-top: 1px solid var(--line); }
+  summary { padding: 10px 16px; cursor: pointer; color: var(--muted); font-size: 14px; }
+  .brief { padding: 4px 16px 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .brief h3 { margin: 0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .brief dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+  .brief dt { color: var(--muted); }
+  .brief dd { margin: 0; }
+  .brief ol { margin: 0; padding-left: 18px; font-size: 14px; display: grid; gap: 4px; }
+  .questions { background: #f7ffe0; border: 1px solid #e2f5a8; border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+  .empty { padding: 30px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">match<span>&amp;</span>meet <small>Garagenportal</small></div>
+    <div class="head-right" id="head-right" hidden><span id="dealer-name"></span><button class="link" id="logout">Abmelden</button></div>
+  </header>
+
+  <form class="panel login" id="login" hidden>
+    <h2>Anmelden</h2>
+    <p class="note">Mit dem Zugangscode, den eure Garage von Match &amp; Meet erhalten hat.</p>
+    <input id="login-code" class="codeinput" placeholder="XXXX-XXXX" autocomplete="off" maxlength="12" aria-label="Zugangscode">
+    <button class="btn">Einloggen</button>
+    <div id="login-result" class="result err" hidden></div>
+  </form>
+
+  <main id="portal" hidden>
+    <section class="kpis">
+      <div class="kpi"><span>Gebuchte Probefahrten</span><b id="k-gebucht">0</b></div>
+      <div class="kpi"><span>Qualifiziert (eingecheckt)</span><b id="k-qualifiziert">0</b></div>
+      <div class="kpi"><span>Check-in-Quote</span><b id="k-quote">0%</b></div>
+      <div class="kpi money"><span id="k-fee">Abrechnung</span><b id="k-summe">CHF 0</b></div>
+    </section>
+    <div class="grid">
+      <form class="panel" id="checkin-form">
+        <h2>📷 Kunden einchecken</h2>
+        <input id="code" class="codeinput" maxlength="6" autocomplete="off" placeholder="CODE" aria-label="Ticket-Code">
+        <button class="btn">Einchecken</button>
+        <div id="result" class="result" hidden></div>
+        <p class="note">QR-Code vom Kunden-Handy scannen oder den 6-stelligen Code eingeben. Erst mit dem Check-in gilt die Probefahrt als qualifiziert und wird verrechnet.</p>
+      </form>
+      <section class="bookings" id="bookings"></section>
+    </div>
+  </main>
+</div>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const PARKEN = { eng: 'Enge Tiefgarage', strasse: 'Strasse', eigener_platz: 'Eigener Platz' };
+const LADEN = { zuhause: 'Zuhause möglich', arbeit: 'Bei der Arbeit', nein: 'Keine Lademöglichkeit' };
+const openCodes = new Set();
+let timer = null;
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+const chf = (n) => 'CHF ' + Number(n).toLocaleString('de-CH');
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  if (!r.ok) {
+    let msg = 'Fehler';
+    try { msg = (await r.json()).detail || msg; } catch {}
+    const err = new Error(msg);
+    err.status = r.status;
+    throw err;
+  }
+  return r.json();
+}
+
+function briefHtml(b) {
+  if (!b.profil_freigabe) return '<div class="brief"><p class="note">Der Kunde hat kein Kurzprofil freigegeben.</p></div>';
+  const p = b.profil || {};
+  const rows = [
+    ['Alltag', p.nutzung || '–'], ['km pro Tag', p.km_pro_tag || '–'],
+    ['Budget', p.budget_max_chf ? 'bis ' + chf(p.budget_max_chf) : '–'],
+    ['Parken', PARKEN[p.parken] || '–'], ['Laden', LADEN[p.laden] || '–'],
+    ['Personen', p.personen || '–'], ['Gepäck', p.gepaeck || '–'],
+  ];
+  const questions = (p.offene_fragen || []).map(q => `<div>❓ ${esc(q)}</div>`).join('') || '<div>Keine offenen Fragen angegeben</div>';
+  const mission = (b.mission || []).map(m => `<li><b>${esc(m.titel)}</b><br><span class="note">${esc(m.warum)}</span></li>`).join('');
+  return `<div class="brief">
+    <div><h3>Kurzprofil</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
+    <div><h3>Offene Fragen: bitte vorbereiten</h3><div class="questions">${questions}</div></div>
+    <div><h3>Probefahrt-Mission des Kunden</h3><ol>${mission}</ol></div>
+  </div>`;
+}
+
+function renderBookings(list) {
+  const box = $('#bookings');
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">Noch keine Buchungen für eure Garage.</div>';
+    return;
+  }
+  box.innerHTML = list.map(b => `
+    <article class="booking">
+      <div class="row">
+        <div class="when">${esc(b.slot_label)}</div>
+        <div class="who"><b>${esc(b.vorname)}</b> · ${esc(b.auto)}</div>
+        <span class="code">${esc(b.code)}</span>
+        <span class="status ${esc(b.status)}">${b.status === 'qualifiziert' ? '✓ qualifiziert · ' + chf(b.fee_chf) : 'gebucht'}</span>
+        ${b.status === 'gebucht' ? `<button class="btn small" data-checkin="${esc(b.code)}">Manuell einchecken</button>` : ''}
+      </div>
+      <details data-code="${esc(b.code)}" ${openCodes.has(b.code) ? 'open' : ''}>
+        <summary>Kurzprofil &amp; Mission ansehen</summary>${briefHtml(b)}
+      </details>
+    </article>`).join('');
+  box.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => {
+    d.open ? openCodes.add(d.dataset.code) : openCodes.delete(d.dataset.code);
+  }));
+  box.querySelectorAll('[data-checkin]').forEach(btn => btn.addEventListener('click', () => checkin(btn.dataset.checkin)));
+}
+
+function showLogin() {
+  clearInterval(timer);
+  timer = null;
+  $('#portal').hidden = true;
+  $('#head-right').hidden = true;
+  $('#login').hidden = false;
+  $('#login-code').focus();
+}
+
+function showPortal(me) {
+  $('#login').hidden = true;
+  $('#portal').hidden = false;
+  $('#head-right').hidden = false;
+  $('#dealer-name').textContent = `${me.name}, ${me.ort}`;
+  const code = new URLSearchParams(location.search).get('code');
+  if (code) {
+    $('#code').value = code.toUpperCase().slice(0, 6);
+    showResult('Code aus QR-Scan übernommen. Bitte mit „Einchecken“ bestätigen.', true);
+  }
+  $('#code').focus();
+  load();
+  if (!timer) timer = setInterval(load, 5000);
+}
+
+async function load() {
+  try {
+    const r = await api('/api/haendler/bookings');
+    $('#k-gebucht').textContent = r.billing.gebucht;
+    $('#k-qualifiziert').textContent = r.billing.qualifiziert;
+    $('#k-quote').textContent = r.billing.checkin_quote + '%';
+    $('#k-summe').textContent = chf(r.billing.summe_chf);
+    $('#k-fee').textContent = `Abrechnung à ${chf(r.billing.fee_chf)} pro qualifizierter Fahrt`;
+    renderBookings(r.bookings);
+  } catch (e) {
+    if (e.status === 401) showLogin();
+  }
+}
+
+function showResult(text, ok) {
+  const r = $('#result');
+  r.textContent = text;
+  r.className = 'result ' + (ok ? 'ok' : 'err');
+  r.hidden = false;
+}
+
+async function checkin(code) {
+  code = code.trim().toUpperCase();
+  if (!code) return;
+  try {
+    const r = await api(`/api/haendler/checkin/${encodeURIComponent(code)}`, {});
+    showResult(r.bereits ? `${r.vorname} (${r.code}) ist bereits eingecheckt.`
+                         : `✓ ${r.vorname} eingecheckt: ${r.auto}. Qualifizierte Probefahrt, ${chf(r.fee_chf)} verrechnet.`, true);
+    $('#code').value = '';
+    load();
+  } catch (e) {
+    showResult(e.message, false);
+  }
+}
+
+$('#login').onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/haendler/login', { code: $('#login-code').value });
+    $('#login-result').hidden = true;
+    showPortal(await api('/api/haendler/me'));
+  } catch (err) {
+    $('#login-result').textContent = err.message;
+    $('#login-result').hidden = false;
+  }
+};
+$('#logout').onclick = async () => { await api('/api/haendler/logout', {}); showLogin(); };
+$('#checkin-form').onsubmit = (e) => { e.preventDefault(); checkin($('#code').value); };
+
+api('/api/haendler/me').then(showPortal).catch(showLogin);
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Match & Meet – Entwicklerkonsole</title>
+<style>
+  :root { --bg: #f4f5f8; --surface: #fff; --line: #e3e6ec; --text: #12151c; --muted: #667085;
+    --accent: #c6ff3d; --ink: #0b0d12; --ok: #0f8a45; --ok-bg: #e3f7ea; --err: #c0263a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  [hidden] { display: none !important; }
+  button, input, textarea { font: inherit; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 20px 40px; display: grid; gap: 18px; }
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    background: var(--ink); color: #fff; padding: 16px 20px; border-radius: 18px; }
+  .logo { font-weight: 800; font-size: 20px; }
+  .logo span { color: var(--accent); }
+  .logo small { font-weight: 500; color: #98a2b6; margin-left: 8px; font-size: 14px; }
+  .head-right { display: flex; gap: 14px; align-items: center; color: #98a2b6; font-size: 13px; }
+  .link { background: none; border: 0; color: #98a2b6; cursor: pointer; }
+  .link:hover { color: #fff; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 8px 16px; cursor: pointer; }
+  .tabs button.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 12px; }
+  .panel h2 { margin: 0; font-size: 17px; }
+  section { display: grid; gap: 18px; }
+  .login { max-width: 420px; width: 100%; margin: 40px auto 0; }
+  input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fff; }
+  textarea { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  .btn { border: 0; border-radius: 12px; padding: 11px 16px; background: var(--accent); color: var(--ink); font-weight: 700; cursor: pointer; justify-self: start; }
+  .btn.small { padding: 6px 10px; font-size: 13px; background: var(--ink); color: #fff; border-radius: 8px; }
+  .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+  .kpi span { color: var(--muted); font-size: 13px; }
+  .kpi b { display: block; font-size: 26px; }
+  .kpi small { color: var(--muted); }
+  .kpi.money { background: var(--ink); color: #fff; }
+  .kpi.money b { color: var(--accent); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  .pill { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: #eef0f4; color: var(--muted); }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .check { display: flex; gap: 8px; align-items: center; color: var(--text); }
+  .check input { width: auto; }
+  .result { padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+  .result.ok { background: var(--ok-bg); color: var(--ok); }
+  .result.err { background: #fde8eb; color: var(--err); }
+  .codeshow { font: 700 22px ui-monospace, Consolas, monospace; letter-spacing: .1em; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">match<span>&amp;</span>meet <small>Entwicklerkonsole</small></div>
+    <div class="head-right" id="head-right" hidden><span id="db-info"></span><button class="link" id="logout">Abmelden</button></div>
+  </header>
+
+  <form class="panel login" id="login" hidden>
+    <h2>Admin-Login</h2>
+    <input type="password" id="password" placeholder="Passwort" autocomplete="current-password">
+    <button class="btn">Einloggen</button>
+    <div id="login-result" class="result err" hidden></div>
+  </form>
+
+  <main id="app" hidden style="display:grid;gap:18px">
+    <nav class="tabs">
+      <button data-tab="overview" class="active">Übersicht</button>
+      <button data-tab="dealers">Garagen</button>
+      <button data-tab="bookings">Buchungen</button>
+      <button data-tab="cars">Fahrzeuge</button>
+    </nav>
+
+    <section id="tab-overview">
+      <div class="kpis" id="funnel"></div>
+      <div class="panel"><h2>Abrechnung pro Garage und Monat</h2><div class="table-wrap"><table id="billing"></table></div></div>
+    </section>
+
+    <section id="tab-dealers" hidden>
+      <div class="panel">
+        <h2>Garagen</h2>
+        <div id="code-box" class="result ok" hidden></div>
+        <div class="table-wrap"><table id="dealer-table"></table></div>
+      </div>
+      <form class="panel" id="dealer-form">
+        <h2>Neue Garage</h2>
+        <div class="form-grid">
+          <label>Name<input id="d-name" required></label>
+          <label>Ort<input id="d-ort" required></label>
+          <label>Adresse<input id="d-adresse"></label>
+          <label>Distanz km<input id="d-distanz" type="number" min="0" value="5"></label>
+          <label>Marken (mit Komma)<input id="d-marken" placeholder="CUPRA, VW, Škoda"></label>
+        </div>
+        <button class="btn">Anlegen und Zugangscode erzeugen</button>
+      </form>
+    </section>
+
+    <section id="tab-bookings" hidden>
+      <div class="panel"><h2>Alle Buchungen</h2><div class="table-wrap"><table id="booking-table"></table></div></div>
+    </section>
+
+    <section id="tab-cars" hidden>
+      <div class="panel">
+        <h2>Fahrzeuge</h2>
+        <div class="table-wrap"><table id="car-table"></table></div>
+        <button class="btn ghost" id="new-car" type="button">+ Neues Fahrzeug</button>
+      </div>
+      <form class="panel" id="car-form" hidden>
+        <h2>Fahrzeug bearbeiten</h2>
+        <label>ID (Kleinbuchstaben, Bindestriche)<input id="car-id" required></label>
+        <label>Daten (JSON)<textarea id="car-json" rows="16"></textarea></label>
+        <label class="check"><input type="checkbox" id="car-aktiv" checked> Aktiv (wird Kunden angezeigt)</label>
+        <button class="btn">Speichern</button>
+        <div id="car-result" class="result" hidden></div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const chf = (n) => 'CHF ' + Number(n).toLocaleString('de-CH');
+const CAR_TEMPLATE = { marke: '', modell: '', segment: 'Kompakt', antrieb: 'Elektro', preis_chf: 0, reichweite_km: 0,
+  e_reichweite_km: 0, kofferraum_l: 0, laenge_mm: 0, breite_mm: 0, sitze: 5, dc_kw: 0, highlight: '', farbe: ['#1c2130', '#5a8fb8'] };
+let cars = [];
+
+async function api(path, body, method) {
+  const opts = body === undefined ? {} : { method: method || 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opts);
+  if (!r.ok) {
+    let msg = 'Fehler';
+    try { msg = (await r.json()).detail || msg; } catch {}
+    const err = new Error(msg);
+    err.status = r.status;
+    if (r.status === 401 && !path.endsWith('/login')) showLogin();
+    throw err;
+  }
+  return r.json();
+}
+
+function table(el, head, rows) {
+  el.innerHTML = `<thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.length ? rows.join('') : `<tr><td colspan="${head.length}">Noch keine Einträge</td></tr>`}</tbody>`;
+}
+
+async function loadOverview() {
+  const { funnel: f, total, abrechnung } = await api('/api/admin/overview');
+  const start = f.chat_start || 0;
+  const pct = (n) => start ? ` <small>${Math.round(100 * n / start)}%</small>` : '';
+  const tiles = [
+    ['Chat gestartet', start, ''], ['Chat abgeschlossen', f.chat_done || 0, pct(f.chat_done || 0)],
+    ['Sitzungen mit Like', f.swipe_like || 0, pct(f.swipe_like || 0)], ['Mission geöffnet', f.mission_open || 0, pct(f.mission_open || 0)],
+    ['Buchungen', total.gebucht, pct(total.gebucht)], ['Check-ins', total.qualifiziert, ` <small>${total.checkin_quote}% der Buchungen</small>`],
+  ];
+  $('#funnel').innerHTML = tiles.map(([l, v, extra]) => `<div class="kpi"><span>${l}</span><b>${v}</b>${extra}</div>`).join('')
+    + `<div class="kpi money"><span>Umsatz total</span><b>${chf(total.summe_chf)}</b></div>`;
+  table($('#billing'), ['Monat', 'Garage', 'Qualifizierte Fahrten', 'Betrag'],
+    abrechnung.map(a => `<tr><td>${esc(a.monat)}</td><td>${esc(a.haendler)}</td><td>${a.fahrten}</td><td><b>${chf(a.summe_chf)}</b></td></tr>`));
+}
+
+async function loadDealers() {
+  const { dealers } = await api('/api/admin/dealers');
+  table($('#dealer-table'), ['Garage', 'Marken', 'Zugang', 'Status', ''],
+    dealers.map(d => `<tr><td><b>${esc(d.name)}</b><br><small>${esc(d.ort)} · ${d.distanz_km} km</small></td>
+      <td>${esc(d.marken.join(', '))}</td>
+      <td>${d.hat_zugang ? '<span class="pill ok">Code vergeben</span>' : '<span class="pill">kein Code</span>'}</td>
+      <td><button class="btn small" data-active="${esc(d.id)}" data-value="${d.aktiv ? 0 : 1}">${d.aktiv ? 'aktiv · deaktivieren' : 'inaktiv · aktivieren'}</button></td>
+      <td><button class="btn small" data-code="${esc(d.id)}" data-name="${esc(d.name)}">${d.hat_zugang ? 'Neuer Code' : 'Code erzeugen'}</button></td></tr>`));
+  document.querySelectorAll('[data-code]').forEach(b => b.onclick = async () => {
+    if (b.textContent === 'Neuer Code' && !confirm(`Neuen Code für ${b.dataset.name} erzeugen? Der alte Code funktioniert danach nicht mehr.`)) return;
+    const r = await api(`/api/admin/dealers/${encodeURIComponent(b.dataset.code)}/code`, {});
+    showCode(b.dataset.name, r.code);
+    loadDealers();
+  });
+  document.querySelectorAll('[data-active]').forEach(b => b.onclick = async () => {
+    await api(`/api/admin/dealers/${encodeURIComponent(b.dataset.active)}/aktiv`, { aktiv: b.dataset.value === '1' });
+    loadDealers();
+  });
+}
+
+function showCode(name, code) {
+  $('#code-box').innerHTML = `Zugangscode für <b>${esc(name)}</b>: <span class="codeshow">${esc(code)}</span><br>
+    Wird nur jetzt angezeigt. Bitte notieren und der Garage geben (Login unter /haendler).`;
+  $('#code-box').hidden = false;
+}
+
+async function loadBookings() {
+  const { bookings } = await api('/api/admin/bookings');
+  table($('#booking-table'), ['Termin', 'Garage', 'Auto', 'Vorname', 'Code', 'Status', 'Gebühr', 'Gebucht am'],
+    bookings.map(b => `<tr><td>${esc(b.slot_label)}</td><td>${esc(b.haendler)}</td><td>${esc(b.auto)}</td><td>${esc(b.vorname)}</td>
+      <td><code>${esc(b.code)}</code></td><td><span class="pill ${b.status === 'qualifiziert' ? 'ok' : ''}">${esc(b.status)}</span></td>
+      <td>${b.fee_chf ? chf(b.fee_chf) : '–'}</td><td>${esc(b.created.replace('T', ' '))}</td></tr>`));
+}
+
+async function loadCars() {
+  cars = (await api('/api/admin/cars')).cars;
+  table($('#car-table'), ['Fahrzeug', 'Antrieb', 'Preis', 'Status', ''],
+    cars.map((c, i) => `<tr><td><b>${esc(c.marke)} ${esc(c.modell)}</b><br><small>${esc(c.id)}</small></td><td>${esc(c.antrieb)}</td>
+      <td>${chf(c.preis_chf)}</td><td><span class="pill ${c.aktiv ? 'ok' : ''}">${c.aktiv ? 'aktiv' : 'inaktiv'}</span></td>
+      <td><button class="btn small" data-car="${i}">Bearbeiten</button></td></tr>`));
+  document.querySelectorAll('[data-car]').forEach(b => b.onclick = () => editCar(cars[b.dataset.car]));
+}
+
+function editCar(car) {
+  const { id, aktiv, ...data } = car || { id: '', aktiv: true, ...CAR_TEMPLATE };
+  $('#car-id').value = id;
+  $('#car-json').value = JSON.stringify(data, null, 2);
+  $('#car-aktiv').checked = aktiv;
+  $('#car-result').hidden = true;
+  $('#car-form').hidden = false;
+  $('#car-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+const loaders = { overview: loadOverview, dealers: loadDealers, bookings: loadBookings, cars: loadCars };
+function openTab(name) {
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('main > section').forEach(s => { s.hidden = s.id !== 'tab-' + name; });
+  loaders[name]().catch(e => { if (e.status !== 401) alert(e.message); });
+}
+
+function showLogin() {
+  $('#app').hidden = true;
+  $('#head-right').hidden = true;
+  $('#login').hidden = false;
+  $('#password').focus();
+}
+
+function showApp(me) {
+  $('#login').hidden = true;
+  $('#app').hidden = false;
+  $('#head-right').hidden = false;
+  $('#db-info').textContent = 'Datenbank: ' + me.datenbank;
+  openTab('overview');
+}
+
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => openTab(b.dataset.tab));
+$('#login').onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await api('/api/admin/login', { password: $('#password').value });
+    $('#password').value = '';
+    $('#login-result').hidden = true;
+    showApp(await api('/api/admin/me'));
+  } catch (err) {
+    $('#login-result').textContent = err.message;
+    $('#login-result').hidden = false;
+  }
+};
+$('#logout').onclick = async () => { await api('/api/admin/logout', {}); showLogin(); };
+$('#dealer-form').onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const r = await api('/api/admin/dealers', {
+      name: $('#d-name').value, ort: $('#d-ort').value, adresse: $('#d-adresse').value,
+      distanz_km: Number($('#d-distanz').value) || 0, marken: $('#d-marken').value.split(',') });
+    showCode(r.name, r.code);
+    e.target.reset();
+    loadDealers();
+  } catch (err) { alert(err.message); }
+};
+$('#new-car').onclick = () => editCar(null);
+$('#car-form').onsubmit = async (e) => {
+  e.preventDefault();
+  const out = $('#car-result');
+  try {
+    const data = JSON.parse($('#car-json').value);
+    await api(`/api/admin/cars/${encodeURIComponent($('#car-id').value.trim())}`, { data, aktiv: $('#car-aktiv').checked }, 'PUT');
+    out.textContent = '✓ Gespeichert';
+    out.className = 'result ok';
+    loadCars();
+  } catch (err) {
+    out.textContent = err instanceof SyntaxError ? 'JSON ungültig: ' + err.message : err.message;
+    out.className = 'result err';
+  }
+  out.hidden = false;
+};
+
+api('/api/admin/me').then(showApp).catch(showLogin);
+</script>
+</body>
+</html>

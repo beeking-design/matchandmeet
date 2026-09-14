@@ -1,0 +1,4 @@
+matchmeet.db
+__pycache__/
+.claude/
+*.pdf
