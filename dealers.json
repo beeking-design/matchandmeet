@@ -1,11 +1,26 @@
 {
-  "hinweis": "Fiktive Haendler fuer den Prototyp.",
+  "hinweis": "Fiktive Garagen fuer den Prototyp. Standorte so gewaehlt, dass in der Pilotregion jede Marke im Umkreis von 20 km erreichbar ist.",
   "haendler": [
-    {"id": "limmat", "name": "Garage Limmat AG", "ort": "Baden", "adresse": "Bruggerstrasse 50, 5400 Baden", "distanz_km": 2, "marken": ["CUPRA", "VW", "Škoda"]},
-    {"id": "wettingen", "name": "Stadtgarage Wettingen", "ort": "Wettingen", "adresse": "Landstrasse 12, 5430 Wettingen", "distanz_km": 4, "marken": ["BMW", "CUPRA"]},
-    {"id": "dietikon", "name": "E-Mobility Hub Dietikon", "ort": "Dietikon", "adresse": "Industriestrasse 8, 8953 Dietikon", "distanz_km": 13, "marken": ["BYD", "Kia", "VW"]},
-    {"id": "furttal", "name": "Garage Furttal", "ort": "Regensdorf", "adresse": "Watterstrasse 101, 8105 Regensdorf", "distanz_km": 17, "marken": ["Toyota", "Dacia", "Škoda"]},
-    {"id": "reuss", "name": "Garage Reuss AG", "ort": "Brugg", "adresse": "Bahnhofstrasse 20, 5200 Brugg", "distanz_km": 10, "marken": ["Renault", "MG", "Volvo"]},
-    {"id": "zuerichwest", "name": "Autocenter Zürich-West", "ort": "Zürich", "adresse": "Hohlstrasse 400, 8048 Zürich", "distanz_km": 22, "marken": ["Hyundai", "Kia", "BYD"]}
+    {"id": "limmat", "name": "Garage Limmat AG", "ort": "Baden", "plz": "5400", "adresse": "Bruggerstrasse 50, 5400 Baden", "lat": 47.46988, "lon": 8.29213, "marken": ["CUPRA", "VW", "Škoda"]},
+    {"id": "wettingen", "name": "Stadtgarage Wettingen", "ort": "Wettingen", "plz": "5430", "adresse": "Landstrasse 12, 5430 Wettingen", "lat": 47.46295, "lon": 8.3321, "marken": ["BMW", "CUPRA"]},
+    {"id": "dietikon", "name": "E-Mobility Hub Dietikon", "ort": "Dietikon", "plz": "8953", "adresse": "Industriestrasse 8, 8953 Dietikon", "lat": 47.40142, "lon": 8.38897, "marken": ["BYD", "Kia", "VW"]},
+    {"id": "furttal", "name": "Garage Furttal", "ort": "Regensdorf", "plz": "8105", "adresse": "Watterstrasse 101, 8105 Regensdorf", "lat": 47.4352, "lon": 8.46717, "marken": ["Toyota", "Dacia", "Škoda"]},
+    {"id": "reuss", "name": "Garage Reuss AG", "ort": "Brugg", "plz": "5200", "adresse": "Bahnhofstrasse 20, 5200 Brugg", "lat": 47.48508, "lon": 8.20623, "marken": ["Renault", "MG", "Volvo"]},
+    {"id": "zuerichwest", "name": "Autocenter Zürich-West", "ort": "Zürich", "plz": "8048", "adresse": "Hohlstrasse 400, 8048 Zürich", "lat": 47.38668, "lon": 8.48382, "marken": ["Hyundai", "Kia", "BYD"]},
+    {"id": "zuerich-altstetten-a", "name": "Garage Zürich-Altstetten AG", "ort": "Zürich-Altstetten", "plz": "8048", "adresse": "Industriestrasse 12, 8048 Zürich", "lat": 47.38668, "lon": 8.48382, "marken": ["VW", "Škoda", "CUPRA", "Seat", "Audi"]},
+    {"id": "zuerich-altstetten-b", "name": "Autocenter Zürich-Altstetten", "ort": "Zürich-Altstetten", "plz": "8048", "adresse": "Bahnhofstrasse 48, 8048 Zürich", "lat": 47.38668, "lon": 8.48382, "marken": ["Toyota", "Kia", "Hyundai", "Mazda", "Suzuki", "Subaru", "BYD", "MG"]},
+    {"id": "zuerich-altstetten-c", "name": "Autohaus Zürich-Altstetten", "ort": "Zürich-Altstetten", "plz": "8048", "adresse": "Gewerbestrasse 7, 8048 Zürich", "lat": 47.38668, "lon": 8.48382, "marken": ["BMW", "Mini", "Mercedes-Benz", "Volvo", "Renault", "Dacia", "Peugeot", "Fiat", "Ford"]},
+    {"id": "pfaeffikon-zh-a", "name": "Garage Pfäffikon ZH AG", "ort": "Pfäffikon ZH", "plz": "8330", "adresse": "Zürcherstrasse 101, 8330 Pfäffikon ZH", "lat": 47.37275, "lon": 8.78458, "marken": ["VW", "Škoda", "CUPRA", "Seat", "Audi"]},
+    {"id": "pfaeffikon-zh-b", "name": "Autocenter Pfäffikon ZH", "ort": "Pfäffikon ZH", "plz": "8330", "adresse": "Landstrasse 33, 8330 Pfäffikon ZH", "lat": 47.37275, "lon": 8.78458, "marken": ["Toyota", "Kia", "Hyundai", "Mazda", "Suzuki", "Subaru", "BYD", "MG"]},
+    {"id": "pfaeffikon-zh-c", "name": "Autohaus Pfäffikon ZH", "ort": "Pfäffikon ZH", "plz": "8330", "adresse": "Werkstrasse 5, 8330 Pfäffikon ZH", "lat": 47.37275, "lon": 8.78458, "marken": ["BMW", "Mini", "Mercedes-Benz", "Volvo", "Renault", "Dacia", "Peugeot", "Fiat", "Ford"]},
+    {"id": "baden-a", "name": "Garage Baden AG", "ort": "Baden", "plz": "5400", "adresse": "Hauptstrasse 76, 5400 Baden", "lat": 47.46988, "lon": 8.29213, "marken": ["VW", "Škoda", "CUPRA", "Seat", "Audi"]},
+    {"id": "baden-b", "name": "Autocenter Baden", "ort": "Baden", "plz": "5400", "adresse": "Allmendstrasse 20, 5400 Baden", "lat": 47.46988, "lon": 8.29213, "marken": ["Toyota", "Kia", "Hyundai", "Mazda", "Suzuki", "Subaru", "BYD", "MG"]},
+    {"id": "baden-c", "name": "Autohaus Baden", "ort": "Baden", "plz": "5400", "adresse": "Industriestrasse 12, 5400 Baden", "lat": 47.46988, "lon": 8.29213, "marken": ["BMW", "Mini", "Mercedes-Benz", "Volvo", "Renault", "Dacia", "Peugeot", "Fiat", "Ford"]},
+    {"id": "buelach-a", "name": "Garage Bülach AG", "ort": "Bülach", "plz": "8180", "adresse": "Bahnhofstrasse 48, 8180 Bülach", "lat": 47.53011, "lon": 8.54125, "marken": ["VW", "Škoda", "CUPRA", "Seat", "Audi"]},
+    {"id": "buelach-b", "name": "Autocenter Bülach", "ort": "Bülach", "plz": "8180", "adresse": "Gewerbestrasse 7, 8180 Bülach", "lat": 47.53011, "lon": 8.54125, "marken": ["Toyota", "Kia", "Hyundai", "Mazda", "Suzuki", "Subaru", "BYD", "MG"]},
+    {"id": "buelach-c", "name": "Autohaus Bülach", "ort": "Bülach", "plz": "8180", "adresse": "Zürcherstrasse 101, 8180 Bülach", "lat": 47.53011, "lon": 8.54125, "marken": ["BMW", "Mini", "Mercedes-Benz", "Volvo", "Renault", "Dacia", "Peugeot", "Fiat", "Ford"]},
+    {"id": "hinwil-a", "name": "Garage Hinwil AG", "ort": "Hinwil", "plz": "8340", "adresse": "Landstrasse 33, 8340 Hinwil", "lat": 47.30289, "lon": 8.85042, "marken": ["VW", "Škoda", "CUPRA", "Seat", "Audi"]},
+    {"id": "hinwil-b", "name": "Autocenter Hinwil", "ort": "Hinwil", "plz": "8340", "adresse": "Werkstrasse 5, 8340 Hinwil", "lat": 47.30289, "lon": 8.85042, "marken": ["Toyota", "Kia", "Hyundai", "Mazda", "Suzuki", "Subaru", "BYD", "MG"]},
+    {"id": "hinwil-c", "name": "Autohaus Hinwil", "ort": "Hinwil", "plz": "8340", "adresse": "Hauptstrasse 76, 8340 Hinwil", "lat": 47.30289, "lon": 8.85042, "marken": ["BMW", "Mini", "Mercedes-Benz", "Volvo", "Renault", "Dacia", "Peugeot", "Fiat", "Ford"]}
   ]
 }

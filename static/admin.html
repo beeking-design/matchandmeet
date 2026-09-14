@@ -33,6 +33,8 @@
   .btn { border: 0; border-radius: 12px; padding: 11px 16px; background: var(--accent); color: var(--ink); font-weight: 700; cursor: pointer; justify-self: start; }
   .btn.small { padding: 6px 10px; font-size: 13px; background: var(--ink); color: #fff; border-radius: 8px; }
   .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--text); }
+  .btn.danger { background: #fde8eb; color: var(--err); }
+  td .btn + .btn { margin-left: 6px; }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
   .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
   .kpi span { color: var(--muted); font-size: 13px; }
@@ -80,6 +82,7 @@
 
     <section id="tab-overview">
       <div class="kpis" id="funnel"></div>
+      <button class="btn danger" id="reset-events" type="button">Quiz-Kennzahlen zurücksetzen</button>
       <div class="panel"><h2>Abrechnung pro Garage und Monat</h2><div class="table-wrap"><table id="billing"></table></div></div>
     </section>
 
@@ -93,9 +96,9 @@
         <h2>Neue Garage</h2>
         <div class="form-grid">
           <label>Name<input id="d-name" required></label>
-          <label>Ort<input id="d-ort" required></label>
+          <label>PLZ<input id="d-plz" required inputmode="numeric" maxlength="4" pattern="\d{4}"></label>
+          <label>Ort (leer = aus PLZ)<input id="d-ort"></label>
           <label>Adresse<input id="d-adresse"></label>
-          <label>Distanz km<input id="d-distanz" type="number" min="0" value="5"></label>
           <label>Marken (mit Komma)<input id="d-marken" placeholder="CUPRA, VW, Škoda"></label>
         </div>
         <button class="btn">Anlegen und Zugangscode erzeugen</button>
@@ -134,7 +137,11 @@ const CAR_TEMPLATE = { marke: '', modell: '', segment: 'Kompakt', antrieb: 'Elek
 let cars = [];
 
 async function api(path, body, method) {
-  const opts = body === undefined ? {} : { method: method || 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const opts = { method: method || (body === undefined ? 'GET' : 'POST') };
+  if (body !== undefined) {
+    opts.headers = { 'Content-Type': 'application/json' };
+    opts.body = JSON.stringify(body);
+  }
   const r = await fetch(path, opts);
   if (!r.ok) {
     let msg = 'Fehler';
@@ -145,6 +152,16 @@ async function api(path, body, method) {
     throw err;
   }
   return r.json();
+}
+
+async function remove(path, question, reload) {
+  if (!confirm(question)) return;
+  try {
+    await api(path, undefined, 'DELETE');
+    reload();
+  } catch (e) {
+    if (e.status !== 401) alert(e.message);
+  }
 }
 
 function table(el, head, rows) {
@@ -170,11 +187,12 @@ async function loadOverview() {
 async function loadDealers() {
   const { dealers } = await api('/api/admin/dealers');
   table($('#dealer-table'), ['Garage', 'Marken', 'Zugang', 'Status', ''],
-    dealers.map(d => `<tr><td><b>${esc(d.name)}</b><br><small>${esc(d.ort)} · ${d.distanz_km} km</small></td>
+    dealers.map(d => `<tr><td><b>${esc(d.name)}</b><br><small>${esc(d.plz || '')} ${esc(d.ort)}${d.lat == null ? ' · ⚠️ ohne Standort' : ''}</small></td>
       <td>${esc(d.marken.join(', '))}</td>
       <td>${d.hat_zugang ? '<span class="pill ok">Code vergeben</span>' : '<span class="pill">kein Code</span>'}</td>
       <td><button class="btn small" data-active="${esc(d.id)}" data-value="${d.aktiv ? 0 : 1}">${d.aktiv ? 'aktiv · deaktivieren' : 'inaktiv · aktivieren'}</button></td>
-      <td><button class="btn small" data-code="${esc(d.id)}" data-name="${esc(d.name)}">${d.hat_zugang ? 'Neuer Code' : 'Code erzeugen'}</button></td></tr>`));
+      <td><button class="btn small" data-code="${esc(d.id)}" data-name="${esc(d.name)}">${d.hat_zugang ? 'Neuer Code' : 'Code erzeugen'}</button><button
+        class="btn small danger" data-del-dealer="${esc(d.id)}" data-name="${esc(d.name)}">Löschen</button></td></tr>`));
   document.querySelectorAll('[data-code]').forEach(b => b.onclick = async () => {
     if (b.textContent === 'Neuer Code' && !confirm(`Neuen Code für ${b.dataset.name} erzeugen? Der alte Code funktioniert danach nicht mehr.`)) return;
     const r = await api(`/api/admin/dealers/${encodeURIComponent(b.dataset.code)}/code`, {});
@@ -185,6 +203,10 @@ async function loadDealers() {
     await api(`/api/admin/dealers/${encodeURIComponent(b.dataset.active)}/aktiv`, { aktiv: b.dataset.value === '1' });
     loadDealers();
   });
+  document.querySelectorAll('[data-del-dealer]').forEach(b => b.onclick = () => remove(
+    `/api/admin/dealers/${encodeURIComponent(b.dataset.delDealer)}`,
+    `Garage „${b.dataset.name}“ endgültig löschen?\n\nAlle Buchungen dieser Garage werden ebenfalls gelöscht und fehlen danach in der Abrechnung. Tipp: „deaktivieren“ blendet sie nur aus.`,
+    loadDealers));
 }
 
 function showCode(name, code) {
@@ -195,10 +217,15 @@ function showCode(name, code) {
 
 async function loadBookings() {
   const { bookings } = await api('/api/admin/bookings');
-  table($('#booking-table'), ['Termin', 'Garage', 'Auto', 'Vorname', 'Code', 'Status', 'Gebühr', 'Gebucht am'],
+  table($('#booking-table'), ['Termin', 'Garage', 'Auto', 'Vorname', 'Code', 'Status', 'Gebühr', 'Gebucht am', ''],
     bookings.map(b => `<tr><td>${esc(b.slot_label)}</td><td>${esc(b.haendler)}</td><td>${esc(b.auto)}</td><td>${esc(b.vorname)}</td>
       <td><code>${esc(b.code)}</code></td><td><span class="pill ${b.status === 'qualifiziert' ? 'ok' : ''}">${esc(b.status)}</span></td>
-      <td>${b.fee_chf ? chf(b.fee_chf) : '–'}</td><td>${esc(b.created.replace('T', ' '))}</td></tr>`));
+      <td>${b.fee_chf ? chf(b.fee_chf) : '–'}</td><td>${esc(b.created.replace('T', ' '))}</td>
+      <td><button class="btn small danger" data-del-booking="${esc(b.code)}" data-label="${esc(b.vorname)}, ${esc(b.auto)}">Löschen</button></td></tr>`));
+  document.querySelectorAll('[data-del-booking]').forEach(b => b.onclick = () => remove(
+    `/api/admin/bookings/${encodeURIComponent(b.dataset.delBooking)}`,
+    `Buchung ${b.dataset.delBooking} (${b.dataset.label}) endgültig löschen?`,
+    loadBookings));
 }
 
 async function loadCars() {
@@ -206,8 +233,13 @@ async function loadCars() {
   table($('#car-table'), ['Fahrzeug', 'Antrieb', 'Preis', 'Status', ''],
     cars.map((c, i) => `<tr><td><b>${esc(c.marke)} ${esc(c.modell)}</b><br><small>${esc(c.id)}</small></td><td>${esc(c.antrieb)}</td>
       <td>${chf(c.preis_chf)}</td><td><span class="pill ${c.aktiv ? 'ok' : ''}">${c.aktiv ? 'aktiv' : 'inaktiv'}</span></td>
-      <td><button class="btn small" data-car="${i}">Bearbeiten</button></td></tr>`));
+      <td><button class="btn small" data-car="${i}">Bearbeiten</button><button
+        class="btn small danger" data-del-car="${esc(c.id)}" data-name="${esc(c.marke)} ${esc(c.modell)}">Löschen</button></td></tr>`));
   document.querySelectorAll('[data-car]').forEach(b => b.onclick = () => editCar(cars[b.dataset.car]));
+  document.querySelectorAll('[data-del-car]').forEach(b => b.onclick = () => remove(
+    `/api/admin/cars/${encodeURIComponent(b.dataset.delCar)}`,
+    `${b.dataset.name} endgültig löschen?\n\nBestehende Buchungen bleiben erhalten. Tipp: Im Editor „Aktiv“ abwählen blendet das Auto nur aus.`,
+    () => { $('#car-form').hidden = true; loadCars(); }));
 }
 
 function editCar(car) {
@@ -260,14 +292,17 @@ $('#dealer-form').onsubmit = async (e) => {
   e.preventDefault();
   try {
     const r = await api('/api/admin/dealers', {
-      name: $('#d-name').value, ort: $('#d-ort').value, adresse: $('#d-adresse').value,
-      distanz_km: Number($('#d-distanz').value) || 0, marken: $('#d-marken').value.split(',') });
+      name: $('#d-name').value, plz: $('#d-plz').value, ort: $('#d-ort').value, adresse: $('#d-adresse').value,
+      marken: $('#d-marken').value.split(',') });
     showCode(r.name, r.code);
     e.target.reset();
     loadDealers();
   } catch (err) { alert(err.message); }
 };
 $('#new-car').onclick = () => editCar(null);
+$('#reset-events').onclick = () => remove('/api/admin/events',
+  'Alle Quiz-Kennzahlen (gestartet, abgeschlossen, Likes, Missionen) auf 0 setzen?\n\nBuchungen und Abrechnung bleiben erhalten.',
+  loadOverview);
 $('#car-form').onsubmit = async (e) => {
   e.preventDefault();
   const out = $('#car-result');

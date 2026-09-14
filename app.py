@@ -15,11 +15,13 @@ import hashlib
 import hmac
 import io
 import json
+import math
 import os
 import re
 import secrets
 import sqlite3
 import time
+import urllib.request
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -77,6 +79,7 @@ SCHEMA = [
         profile_json TEXT NOT NULL, mission_json TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'gebucht',
         fee_chf INTEGER NOT NULL DEFAULT 0, checked_in TEXT, UNIQUE (dealer_id, slot))""",
     """CREATE TABLE IF NOT EXISTS events (id TEXT PRIMARY KEY, created TEXT NOT NULL, sid TEXT NOT NULL, typ TEXT NOT NULL)""",
+    """CREATE TABLE IF NOT EXISTS deleted_seed (kind TEXT NOT NULL, id TEXT NOT NULL, PRIMARY KEY (kind, id))""",
 ]
 _schema_ready = False
 
@@ -89,13 +92,28 @@ def ensure_schema():
     with db() as conn:
         for stmt in SCHEMA:
             q(conn, stmt)
-        # Seed sync: add new sample dealers/cars and photos, but never overwrite edits made in the admin console.
+        # Migration: dealers created before the postcode search have no location columns yet.
+        existing_cols = column_names(conn, "dealers")
+        for col, typ in (("plz", "TEXT"), ("lat", "REAL"), ("lon", "REAL")):
+            if col not in existing_cols:
+                q(conn, f"ALTER TABLE dealers ADD COLUMN {col} {typ}")
+        # Seed sync: add new sample dealers/cars and photos, but never overwrite admin edits
+        # and never bring back what was deleted in the admin console.
+        deleted = {(r["kind"], r["id"]) for r in q(conn, "SELECT kind, id FROM deleted_seed").fetchall()}
         for d in json.loads((BASE / "dealers.json").read_text(encoding="utf-8"))["haendler"]:
-            q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken) VALUES (?, ?, ?, ?, ?, ?) "
-                    "ON CONFLICT (id) DO NOTHING",
-              (d["id"], d["name"], d["ort"], d["adresse"], d["distanz_km"], json.dumps(d["marken"], ensure_ascii=False)))
+            if ("dealer", d["id"]) in deleted:
+                continue
+            q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken, plz, lat, lon) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING",
+              (d["id"], d["name"], d["ort"], d["adresse"], 0, json.dumps(d["marken"], ensure_ascii=False),
+               d["plz"], d["lat"], d["lon"]))
+            # Sample dealers seeded before coordinates existed get their location once.
+            q(conn, "UPDATE dealers SET plz = ?, lat = ?, lon = ? WHERE id = ? AND lat IS NULL",
+              (d["plz"], d["lat"], d["lon"], d["id"]))
         existing = {r["id"]: json.loads(r["data"]) for r in q(conn, "SELECT id, data FROM cars").fetchall()}
         for c in json.loads((BASE / "cars.json").read_text(encoding="utf-8"))["modelle"]:
+            if ("car", c["id"]) in deleted:
+                continue
             if c["id"] not in existing:
                 q(conn, "INSERT INTO cars (id, data) VALUES (?, ?)", (c["id"], json.dumps(c, ensure_ascii=False)))
             elif c.get("bild_url") and not existing[c["id"]].get("bild_url"):
@@ -112,15 +130,61 @@ def load_cars(conn, only_active=True):
 
 
 def load_dealers(conn, only_active=True):
-    rows = q(conn, "SELECT * FROM dealers ORDER BY distanz_km, name").fetchall()
-    return {r["id"]: {"id": r["id"], "name": r["name"], "ort": r["ort"], "adresse": r["adresse"],
-                      "distanz_km": r["distanz_km"], "marken": json.loads(r["marken"]),
+    rows = q(conn, "SELECT * FROM dealers ORDER BY name").fetchall()
+    return {r["id"]: {"id": r["id"], "name": r["name"], "ort": r["ort"], "adresse": r["adresse"], "plz": r["plz"],
+                      "lat": r["lat"], "lon": r["lon"], "marken": json.loads(r["marken"]),
                       "aktiv": bool(r["aktiv"]), "hat_zugang": r["code_hash"] is not None}
             for r in rows if r["aktiv"] or not only_active}
 
 
 def public_dealer(d):
-    return {k: d[k] for k in ("id", "name", "ort", "adresse", "distanz_km", "marken")}
+    return {k: d[k] for k in ("id", "name", "ort", "plz", "adresse", "marken")}
+
+
+def column_names(conn, table):
+    if IS_POSTGRES:
+        rows = q(conn, "SELECT column_name FROM information_schema.columns WHERE table_name = ?", (table,)).fetchall()
+        return {r["column_name"] for r in rows}
+    return {r["name"] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+
+
+# ---------- location (Swiss postcodes) ----------
+
+RADIUS_KM = 20
+PLZ_REGION = json.loads((BASE / "plz.json").read_text(encoding="utf-8"))["plz"]
+_plz_cache = {}
+
+
+def lookup_plz(plz):
+    """Postcode -> place with coordinates: pilot-region table first, then the official swisstopo search."""
+    plz = plz.strip()
+    if not re.fullmatch(r"\d{4}", plz):
+        return None
+    if plz in PLZ_REGION:
+        return {"plz": plz, **PLZ_REGION[plz]}
+    if plz not in _plz_cache:
+        url = f"https://api3.geo.admin.ch/rest/services/api/SearchServer?searchText={plz}&type=locations&origins=zipcode&limit=5"
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": "MatchMeet/1.0"})
+            results = json.load(urllib.request.urlopen(request, timeout=4)).get("results", [])
+        except (OSError, ValueError):
+            return None  # not cached, so a temporary outage can recover
+        place = None
+        for r in results:
+            attrs = r.get("attrs", {})
+            label = re.sub(r"<[^>]+>", "", attrs.get("label", ""))
+            if label.startswith(plz) and "lat" in attrs and "lon" in attrs:
+                place = {"plz": plz, "ort": label.split(" - ", 1)[-1].strip(), "lat": attrs["lat"], "lon": attrs["lon"]}
+                break
+        _plz_cache[plz] = place
+    return _plz_cache[plz]
+
+
+def distance_km(lat1, lon1, lat2, lon2):
+    """Distance as the crow flies."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    h = math.sin((p2 - p1) / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(math.radians(lon2 - lon1) / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(h))
 
 
 # ---------- helpers ----------
@@ -159,7 +223,7 @@ def booking_out(row, cars, dealers):
         "code": row["code"], "created": row["created"], "vorname": row["vorname"],
         "status": row["status"], "fee_chf": row["fee_chf"], "checked_in": row["checked_in"],
         "slot": row["slot"], "slot_label": slot_label(row["slot"]),
-        "car_id": row["car_id"], "auto": f"{car.get('marke', '')} {car.get('modell', '')}".strip(),
+        "car_id": row["car_id"], "auto": f"{car.get('marke', '')} {car.get('modell', '')}".strip() or row["car_id"],
         "dealer_id": row["dealer_id"], "haendler": dealer.get("name", ""), "adresse": dealer.get("adresse", ""),
         "profil_freigabe": bool(row["profil_freigabe"]),
         "profil": json.loads(row["profile_json"]), "mission": json.loads(row["mission_json"]),
@@ -454,7 +518,7 @@ def rule_mission(p, car):
         items.append({"titel": "Setz dich auf die Rückbank", "warum": "So prüfst du Platz und Einstieg für Mitfahrende."})
     for question in (p.get("offene_fragen") or [])[:1]:
         items.append({"titel": f"Frag den Berater: {question[:70]}",
-                      "warum": "Deine offene Frage aus dem Chat: hier bekommst du die Antwort."})
+                      "warum": "Deine Frage aus dem Quiz: hier bekommst du die Antwort."})
     items.append({"titel": "Verbinde dein Handy mit dem Infotainment", "warum": "Navi und Musik sind im Alltag wichtiger, als man denkt."})
     return items[:5]
 
@@ -566,9 +630,9 @@ class PasswordRequest(BaseModel):
 
 class DealerCreate(BaseModel):
     name: str
-    ort: str
+    plz: str
+    ort: str = ""
     adresse: str = ""
-    distanz_km: int = 0
     marken: list[str] = []
 
 
@@ -623,11 +687,33 @@ def mission(req: MissionRequest):
     return {"items": rule_mission(req.profile, car), "tipp": rule_tip(req.profile, car)}
 
 
+@app.get("/api/plz/{plz}")
+def plz_lookup(plz: str):
+    place = lookup_plz(plz)
+    if not place:
+        raise HTTPException(404, "PLZ nicht gefunden")
+    return place
+
+
 @app.get("/api/dealers")
-def dealers(brand: str = ""):
+def dealers(brand: str = "", plz: str = "", limit: int = 5):
+    place = lookup_plz(plz) if plz else None
+    if plz and not place:
+        raise HTTPException(404, "PLZ nicht gefunden")
     with db() as conn:
-        found = [d for d in load_dealers(conn).values() if not brand or brand in d["marken"]]
-        return {"dealers": [{**public_dealer(d), "slots": slots_for(conn, d["id"])} for d in found]}
+        found = []
+        for d in load_dealers(conn).values():
+            if brand and brand not in d["marken"]:
+                continue
+            item = public_dealer(d)
+            if place and d["lat"] is not None:
+                item["distanz_km"] = round(distance_km(place["lat"], place["lon"], d["lat"], d["lon"]), 1)
+            found.append(item)
+        if place:
+            found.sort(key=lambda d: d.get("distanz_km", 9999))
+            found = found[:max(1, min(limit, 20))]
+        return {"ort": place, "radius_km": RADIUS_KM,
+                "dealers": [{**d, "slots": slots_for(conn, d["id"])} for d in found]}
 
 
 @app.post("/api/bookings")
@@ -768,15 +854,20 @@ def admin_dealers():
 @app.post("/api/admin/dealers", dependencies=[Depends(require_admin)])
 def admin_create_dealer(req: DealerCreate):
     name = req.name.strip()[:80]
-    if not name or not req.ort.strip():
-        raise HTTPException(400, "Name und Ort sind Pflicht")
+    if not name:
+        raise HTTPException(400, "Name ist Pflicht")
+    place = lookup_plz(req.plz)
+    if not place:
+        raise HTTPException(400, "PLZ nicht gefunden")
     slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:30] or "garage"
     dealer_id, code = f"{slug}-{secrets.token_hex(2)}", new_code()
     marken = [m.strip() for m in req.marken if m.strip()][:12]
+    ort = req.ort.strip()[:60] or place["ort"]
     with db() as conn:
-        q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken, code_hash) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          (dealer_id, name, req.ort.strip()[:60], req.adresse.strip()[:120], max(0, req.distanz_km),
-           json.dumps(marken, ensure_ascii=False), hash_code(code)))
+        q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken, code_hash, plz, lat, lon) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          (dealer_id, name, ort, req.adresse.strip()[:120] or f"{place['plz']} {ort}", 0,
+           json.dumps(marken, ensure_ascii=False), hash_code(code), place["plz"], place["lat"], place["lon"]))
     return {"id": dealer_id, "name": name, "code": code}
 
 
@@ -818,7 +909,48 @@ def admin_save_car(car_id: str, req: CarRequest):
         q(conn, "INSERT INTO cars (id, data, aktiv) VALUES (?, ?, ?) "
                 "ON CONFLICT (id) DO UPDATE SET data = excluded.data, aktiv = excluded.aktiv",
           (car_id, json.dumps(car, ensure_ascii=False), int(req.aktiv)))
+        q(conn, "DELETE FROM deleted_seed WHERE kind = 'car' AND id = ?", (car_id,))
     return {**car, "aktiv": req.aktiv}
+
+
+def forget_seed(conn, kind, item_id):
+    """Remember deleted ids so the seed sync does not bring sample data back."""
+    q(conn, "INSERT INTO deleted_seed (kind, id) VALUES (?, ?) ON CONFLICT (kind, id) DO NOTHING", (kind, item_id))
+
+
+@app.delete("/api/admin/dealers/{dealer_id}", dependencies=[Depends(require_admin)])
+def admin_delete_dealer(dealer_id: str):
+    with db() as conn:
+        if q(conn, "DELETE FROM dealers WHERE id = ?", (dealer_id,)).rowcount == 0:
+            raise HTTPException(404, "Garage nicht gefunden")
+        # Bookings without a garage could never be checked in, so they go too.
+        removed = q(conn, "DELETE FROM bookings WHERE dealer_id = ?", (dealer_id,)).rowcount
+        forget_seed(conn, "dealer", dealer_id)
+    return {"ok": True, "buchungen_geloescht": removed}
+
+
+@app.delete("/api/admin/bookings/{code}", dependencies=[Depends(require_admin)])
+def admin_delete_booking(code: str):
+    with db() as conn:
+        if q(conn, "DELETE FROM bookings WHERE code = ?", (code.strip().upper(),)).rowcount == 0:
+            raise HTTPException(404, "Buchung nicht gefunden")
+    return {"ok": True}
+
+
+@app.delete("/api/admin/cars/{car_id}", dependencies=[Depends(require_admin)])
+def admin_delete_car(car_id: str):
+    with db() as conn:
+        if q(conn, "DELETE FROM cars WHERE id = ?", (car_id,)).rowcount == 0:
+            raise HTTPException(404, "Fahrzeug nicht gefunden")
+        forget_seed(conn, "car", car_id)
+    return {"ok": True}
+
+
+@app.delete("/api/admin/events", dependencies=[Depends(require_admin)])
+def admin_reset_events():
+    with db() as conn:
+        removed = q(conn, "DELETE FROM events").rowcount
+    return {"ok": True, "geloescht": removed}
 
 
 if __name__ == "__main__":

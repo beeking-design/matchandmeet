@@ -147,10 +147,9 @@
   .tip { padding: 14px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--accent); }
   .tip p { margin: 6px 0 0; }
   .mission { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-  .mission label { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; cursor: pointer; }
-  .mission input { appearance: none; width: 24px; height: 24px; border-radius: 8px; border: 2px solid var(--line); flex: none; margin: 1px 0 0; display: grid; place-items: center; cursor: pointer; }
-  .mission input:checked { background: var(--accent); border-color: var(--accent); }
-  .mission input:checked::after { content: "✓"; color: var(--ink); font-weight: 900; font-size: 15px; }
+  .mission li { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+  .mission .num { width: 26px; height: 26px; border-radius: 8px; background: var(--surface2); color: var(--accent);
+    font-weight: 800; font-size: 14px; display: grid; place-items: center; flex: none; }
   .mission b { display: block; }
   .mission small { color: var(--muted); }
   .source { font-size: 12px; color: var(--muted); }
@@ -159,6 +158,8 @@
   .dealer { padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; display: grid; gap: 10px; }
   .dealer.active { border-color: var(--accent); }
   .dealer small { color: var(--muted); }
+  .near { color: var(--accent); font-weight: 600; }
+  .plz-input { font-size: 22px !important; letter-spacing: .15em; }
   .slots { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
   .slot { flex: none; border: 1px solid var(--line); background: var(--surface2); color: var(--text); border-radius: 14px;
     padding: 8px 12px; font-size: 12px; cursor: pointer; text-align: center; line-height: 1.25; }
@@ -281,6 +282,9 @@
       <button class="link" data-go="v-mission" aria-label="Zurück">← Mission</button>
     </div>
     <h2 class="title" id="booking-title">Termin wählen</h2>
+    <label class="field"><span class="muted">Deine PLZ: Wir zeigen dir die nächsten Garagen</span>
+      <input id="plz" class="plz-input" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="z. B. 8400"></label>
+    <p class="muted" id="plz-info" hidden></p>
     <div class="list" id="dealer-list"></div>
     <div id="booking-form" class="list">
       <label class="field"><span class="muted">Dein Vorname</span><input id="vorname" maxlength="40" autocomplete="given-name" placeholder="z. B. Lea"></label>
@@ -310,7 +314,7 @@
 const $ = (sel) => document.querySelector(sel);
 const state = { quiz: [], step: 0, selection: {}, advancing: false,
                 profile: null, cars: [], index: 0, liked: [], animating: false,
-                car: null, mission: [], dealer: null, slot: null };
+                car: null, mission: [], dealer: null, slot: null, plz: '', dealerRequest: 0 };
 
 const PARKEN = { eng: 'Enge Tiefgarage', strasse: 'Parkt an der Strasse', eigener_platz: 'Eigener Parkplatz' };
 const LADEN = { zuhause: 'Laden zuhause', arbeit: 'Laden bei der Arbeit', nein: 'Keine Lademöglichkeit' };
@@ -608,9 +612,10 @@ function finishSwipe() {
 
 /* ---------- mission ---------- */
 
-function missionHtml(items, prefix) {
-  return items.map((it, i) => `<li><label><input type="checkbox" id="${prefix}-${i}">
-    <div><b>${esc(it.titel)}</b><small>${esc(it.warum)}</small></div></label></li>`).join('');
+// Read-only numbered list: the mission is a plan to take along, not a form.
+function missionHtml(items) {
+  return items.map((it, i) => `<li><span class="num">${i + 1}</span>
+    <div><b>${esc(it.titel)}</b><small>${esc(it.warum)}</small></div></li>`).join('');
 }
 
 async function openMission(car) {
@@ -631,7 +636,7 @@ async function openMission(car) {
   $('#mission-car').style.cssText = carColors(car);
   $('#mission-car').innerHTML = `${photo}<span class="brand">${esc(car.marke)} · ${car.match_pct}% Match</span>
     <h2>${esc(car.modell)}</h2><div class="sub">${esc(car.antrieb)} · ${chf(car.preis_chf)}</div>${credit}`;
-  $('#mission-list').innerHTML = missionHtml(state.mission, 'm');
+  $('#mission-list').innerHTML = missionHtml(state.mission);
   $('#mission-source').textContent = source;
   show('v-mission');
   track('mission_open');
@@ -639,22 +644,54 @@ async function openMission(car) {
 
 /* ---------- booking ---------- */
 
-async function openBooking() {
+function openBooking() {
   const car = state.car;
   state.dealer = null; state.slot = null;
   $('#booking-title').textContent = `${car.marke} ${car.modell} probefahren`;
-  let dealers = [];
-  try { dealers = (await api('/api/dealers?brand=' + encodeURIComponent(car.marke))).dealers; } catch (e) { toast(e.message); }
+  $('#dealer-list').innerHTML = '';
+  $('#booking-form').hidden = true;
+  $('#plz-info').hidden = true;
+  show('v-booking');
+  $('#plz').value = state.plz;
+  if (state.plz) loadDealers();
+  else $('#plz').focus();
+}
+
+async function loadDealers() {
+  const plz = $('#plz').value.trim();
+  if (!/^\d{4}$/.test(plz)) return;
+  const car = state.car;
+  const request = ++state.dealerRequest; // ignore answers to older PLZ inputs
+  Object.assign(state, { plz, dealer: null, slot: null });
   const list = $('#dealer-list');
-  list.innerHTML = '';
-  $('#booking-form').hidden = !dealers.length;
-  if (!dealers.length) {
-    list.innerHTML = `<div class="empty">Noch kein Partner-Händler für ${esc(car.marke)} in deiner Nähe.<br>Wähle ein anderes Match.</div>`;
+  const info = $('#plz-info');
+  let r;
+  try {
+    r = await api(`/api/dealers?brand=${encodeURIComponent(car.marke)}&plz=${plz}&limit=5`);
+  } catch (e) {
+    if (request !== state.dealerRequest) return;
+    list.innerHTML = '';
+    $('#booking-form').hidden = true;
+    info.textContent = e.message;
+    info.hidden = false;
+    return;
   }
-  dealers.forEach(d => {
+  if (request !== state.dealerRequest) return;
+  const near = r.dealers.filter(d => d.distanz_km <= r.radius_km).length;
+  info.textContent = `📍 ${r.ort.plz} ${r.ort.ort}: ` + (near
+    ? `${near} ${car.marke}-Garage${near === 1 ? '' : 'n'} im Umkreis von ${r.radius_km} km`
+    : `keine ${car.marke}-Garage im Umkreis von ${r.radius_km} km, hier die nächsten`);
+  info.hidden = false;
+  list.innerHTML = '';
+  $('#booking-form').hidden = !r.dealers.length;
+  if (!r.dealers.length) {
+    list.innerHTML = `<div class="empty">Noch kein Partner-Händler für ${esc(car.marke)}.<br>Wähle ein anderes Match.</div>`;
+  }
+  r.dealers.forEach(d => {
     const box = document.createElement('div');
     box.className = 'dealer';
-    box.innerHTML = `<div><b>${esc(d.name)}</b><br><small>${esc(d.adresse)} · ${d.distanz_km} km</small></div><div class="slots"></div>`;
+    const km = d.distanz_km == null ? '' : ` · <span class="${d.distanz_km <= r.radius_km ? 'near' : ''}">${d.distanz_km} km</span>`;
+    box.innerHTML = `<div><b>${esc(d.name)}</b><br><small>${esc(d.adresse)}${km}</small></div><div class="slots"></div>`;
     d.slots.forEach(s => {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'slot';
@@ -668,7 +705,6 @@ async function openBooking() {
     });
     list.append(box);
   });
-  show('v-booking');
 }
 
 async function book() {
@@ -704,7 +740,7 @@ function renderTicket(b) {
         <div><span>Kurzprofil</span><b>${b.profil_freigabe ? 'geteilt ✓' : 'nicht geteilt'}</b></div>
       </div>
     </div>`;
-  $('#ticket-mission').innerHTML = missionHtml(state.mission, 't');
+  $('#ticket-mission').innerHTML = missionHtml(state.mission);
 }
 
 /* ---------- wiring ---------- */
@@ -717,6 +753,11 @@ $('#like-btn').onclick = () => decide(true);
 $('#nope-btn').onclick = () => decide(false);
 $('#reswipe').onclick = () => { Object.assign(state, { index: 0, liked: [] }); renderStack(); show('v-swipe'); };
 $('#to-booking').onclick = openBooking;
+$('#plz').oninput = () => {
+  const input = $('#plz');
+  input.value = input.value.replace(/\D/g, '').slice(0, 4);
+  if (input.value.length === 4) loadDealers();
+};
 $('#book-btn').onclick = book;
 $('#restart').onclick = () => show('v-start');
 document.addEventListener('keydown', (e) => {
