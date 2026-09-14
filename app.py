@@ -89,13 +89,19 @@ def ensure_schema():
     with db() as conn:
         for stmt in SCHEMA:
             q(conn, stmt)
-        if not q(conn, "SELECT 1 FROM dealers LIMIT 1").fetchone():
-            for d in json.loads((BASE / "dealers.json").read_text(encoding="utf-8"))["haendler"]:
-                q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken) VALUES (?, ?, ?, ?, ?, ?)",
-                  (d["id"], d["name"], d["ort"], d["adresse"], d["distanz_km"], json.dumps(d["marken"], ensure_ascii=False)))
-        if not q(conn, "SELECT 1 FROM cars LIMIT 1").fetchone():
-            for c in json.loads((BASE / "cars.json").read_text(encoding="utf-8"))["modelle"]:
+        # Seed sync: add new sample dealers/cars and photos, but never overwrite edits made in the admin console.
+        for d in json.loads((BASE / "dealers.json").read_text(encoding="utf-8"))["haendler"]:
+            q(conn, "INSERT INTO dealers (id, name, ort, adresse, distanz_km, marken) VALUES (?, ?, ?, ?, ?, ?) "
+                    "ON CONFLICT (id) DO NOTHING",
+              (d["id"], d["name"], d["ort"], d["adresse"], d["distanz_km"], json.dumps(d["marken"], ensure_ascii=False)))
+        existing = {r["id"]: json.loads(r["data"]) for r in q(conn, "SELECT id, data FROM cars").fetchall()}
+        for c in json.loads((BASE / "cars.json").read_text(encoding="utf-8"))["modelle"]:
+            if c["id"] not in existing:
                 q(conn, "INSERT INTO cars (id, data) VALUES (?, ?)", (c["id"], json.dumps(c, ensure_ascii=False)))
+            elif c.get("bild_url") and not existing[c["id"]].get("bild_url"):
+                photo = {k: c[k] for k in PHOTO_FIELDS if k in c}
+                q(conn, "UPDATE cars SET data = ? WHERE id = ?",
+                  (json.dumps({**existing[c["id"]], **photo}, ensure_ascii=False), c["id"]))
     _schema_ready = True
 
 
@@ -533,6 +539,7 @@ CAR_FIELDS = {"marke": str, "modell": str, "segment": str, "antrieb": str, "prei
               "e_reichweite_km": int, "kofferraum_l": int, "laenge_mm": int, "breite_mm": int, "sitze": int,
               "dc_kw": int, "highlight": str}
 ANTRIEBE = {"Elektro", "Plug-in-Hybrid", "Hybrid", "Mild-Hybrid", "Benzin", "Diesel"}
+PHOTO_FIELDS = ("bild_url", "bild_quelle", "bild_link")  # optional; photos need a credit line (CC licenses)
 
 
 def validate_car(car_id, data):
@@ -547,7 +554,15 @@ def validate_car(car_id, data):
     if not (isinstance(farbe, list) and len(farbe) == 2
             and all(isinstance(c, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", c) for c in farbe)):
         raise HTTPException(400, 'farbe: zwei Hex-Farben, z. B. ["#1c2b2f", "#b8733a"]')
-    return {"id": car_id, **{k: data[k] for k in CAR_FIELDS}, "farbe": farbe}
+    photo = {}
+    for key in PHOTO_FIELDS:
+        value = data.get(key)
+        if value in (None, ""):
+            continue
+        if not isinstance(value, str) or (key != "bild_quelle" and not value.startswith("https://")):
+            raise HTTPException(400, f"{key}: muss eine https-Adresse sein" if key != "bild_quelle" else "bild_quelle: Text erwartet")
+        photo[key] = value[:300]
+    return {"id": car_id, **{k: data[k] for k in CAR_FIELDS}, "farbe": farbe, **photo}
 
 
 # ---------- app ----------

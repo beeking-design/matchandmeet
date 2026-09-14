@@ -129,7 +129,8 @@ const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const chf = (n) => 'CHF ' + Number(n).toLocaleString('de-CH');
 const CAR_TEMPLATE = { marke: '', modell: '', segment: 'Kompakt', antrieb: 'Elektro', preis_chf: 0, reichweite_km: 0,
-  e_reichweite_km: 0, kofferraum_l: 0, laenge_mm: 0, breite_mm: 0, sitze: 5, dc_kw: 0, highlight: '', farbe: ['#1c2130', '#5a8fb8'] };
+  e_reichweite_km: 0, kofferraum_l: 0, laenge_mm: 0, breite_mm: 0, sitze: 5, dc_kw: 0, highlight: '', farbe: ['#1c2130', '#5a8fb8'],
+  bild_url: '', bild_quelle: 'Foto: … · Lizenz · Wikimedia Commons', bild_link: '' };
 let cars = [];
 
 async function api(path, body, method) {

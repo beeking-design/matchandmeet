@@ -26,5 +26,6 @@ Customer http://localhost:8000 · Garage http://localhost:8000/haendler · Devel
 
 ## Notes
 - User-facing strings in German (Swiss spelling, "ss" instead of "ß"); code and comments in English
-- No CDN or external assets
+- No CDN; the only external assets are car photos hotlinked from Wikimedia Commons (`bild_url`) with a mandatory credit (`bild_quelle`, `bild_link`). The SVG silhouette is the fallback.
+- Seed data syncs on start: new ids from `cars.json`/`dealers.json` are inserted, photos are added to cars without one; admin edits are never overwritten.
 - Fee per qualified test drive: `FEE_CHF` in `app.py`
