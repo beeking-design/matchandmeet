@@ -21,7 +21,6 @@
     --bg: #f4f1ec; --glow: rgba(176,112,63,.14);
     --surface: #ffffff; --surface2: #ece7df; --line: #ddd5c9;
     --text: #151515; --muted: #6b6660; --accent: #b0703f; --on-accent: #ffffff; --accent-text: #8a4f2a;
-    --like: #2f855a; --nope: #c53030;
     --shadow: 0 10px 30px rgba(40,28,15,.08); --shadow-lg: 0 24px 50px rgba(40,28,15,.16);
     --studio: radial-gradient(ellipse at 50% 72%, #ffffff 0%, #ece8e2 72%);
   }
@@ -30,7 +29,6 @@
     --bg: #0c0d0f; --glow: rgba(200,135,90,.12);
     --surface: #16181b; --surface2: #1f2226; --line: #2c2f34;
     --text: #f2efe9; --muted: #9c968d; --accent: #c8875a; --on-accent: #0c0d0f; --accent-text: #d9a077;
-    --like: #6fd3a0; --nope: #ff6b6b;
     --shadow: 0 12px 30px rgba(0,0,0,.4); --shadow-lg: 0 24px 50px rgba(0,0,0,.55);
     --studio: radial-gradient(ellipse at 50% 72%, #f6f4f0 0%, #d9d4cc 75%);
   }
@@ -102,7 +100,6 @@
   .model-strip .pic { height: 86px; border-radius: 16px; overflow: hidden; background: var(--studio); }
   .model-strip img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
   .model-strip figcaption { margin-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-  .disclaimer { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--muted); text-align: center; }
 
   /* quiz */
   .subbar .link, .subbar .badge { white-space: nowrap; flex: none; }
@@ -137,95 +134,57 @@
   .preset { border: 1px solid var(--line); background: var(--surface2); border-radius: 99px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
   .preset:hover { border-color: var(--accent); }
 
-  /* team reveal */
-  .team { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 30px 20px; margin-top: 12px;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow-lg); }
-  .team-emoji { font-size: 80px; line-height: 1.1; animation: bounce-in .7s cubic-bezier(.3,1.6,.5,1); }
-  @keyframes bounce-in { from { transform: scale(.2) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
-  .team .title { font-size: 32px; text-transform: uppercase; letter-spacing: .01em; color: var(--accent-text); }
-  .team p { margin: 0; max-width: 32ch; }
-
   /* loading */
   .loader { flex: 1; display: grid; place-items: center; align-content: center; gap: 14px; text-align: center; padding: 40px 10px; }
   .loader-car { font-size: 52px; animation: drive 1.1s ease-in-out infinite; }
   @keyframes drive { 0%, 100% { transform: translateX(-24px); } 50% { transform: translateX(24px) rotate(-4deg); } }
   .loader h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
 
-  /* swipe */
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: inherit; }
+  /* results: driving profile + suggestions */
+  .team { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 26px 20px; margin-top: 8px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow); }
+  .team-emoji { font-size: 72px; line-height: 1.1; animation: bounce-in .7s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes bounce-in { from { transform: scale(.2) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .team .title { font-size: 30px; text-transform: uppercase; letter-spacing: .01em; color: var(--accent-text); }
+  .team p { margin: 0; max-width: 32ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px; }
   .tags span { font-size: 12px; padding: 5px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); font-weight: 600; }
-  .stack { position: relative; height: min(640px, 74vh); min-height: 560px; }
-  .card { position: absolute; inset: 0; border-radius: 28px; padding: 16px; color: #fff;
-    background: linear-gradient(165deg, var(--c1) 30%, var(--c2)); box-shadow: var(--shadow-lg);
-    display: flex; flex-direction: column; gap: 7px; overflow: hidden;
-    transform: translateY(calc(var(--depth, 0) * 12px)) scale(calc(1 - var(--depth, 0) * .045));
-    transition: transform .25s; user-select: none; touch-action: none; }
-  .card[data-top] { cursor: grab; }
-  .card[data-top]:active { cursor: grabbing; }
-  .card-top { display: flex; justify-content: space-between; align-items: center; }
-  .brand { font-weight: 700; letter-spacing: .2em; text-transform: uppercase; font-size: 12px; opacity: .85; }
-  .pct { background: rgba(0,0,0,.45); padding: 5px 10px; border-radius: 99px; font-size: 13px; font-weight: 800; color: #e2b48f; }
-  .car-art svg { width: 100%; height: auto; display: block; }
-  .photo { position: relative; margin: 0; height: 170px; border-radius: 18px; overflow: hidden; background: var(--studio); flex: none; }
-  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; mix-blend-mode: multiply; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 6px; }
+  .section-head h2 { margin: 0; font-size: 22px; text-transform: uppercase; letter-spacing: .01em; }
+  .results { display: grid; gap: 16px; }
+  .sugg { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow);
+    animation: fade .45s ease both; }
+  .sugg.top { border-color: var(--accent); }
+  .photo { position: relative; margin: 0; height: 180px; overflow: hidden; background: var(--studio); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; mix-blend-mode: multiply; }
   .photo figcaption { position: absolute; right: 8px; bottom: 6px; max-width: 92%; font-size: 10px; color: #fff;
     background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .photo .ribbon { position: absolute; left: 10px; top: 10px; padding: 5px 10px; border-radius: 99px; background: #151515; color: #e2b48f;
+    font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .photo svg { display: none; }
   .photo.broken img, .photo.broken figcaption { display: none; }
   .photo.broken svg { display: block; width: 100%; height: 100%; }
-  .card h3 { margin: 0; font-size: 26px; letter-spacing: -.01em; line-height: 1.05; text-transform: uppercase; font-weight: 800; }
-  .sub { color: rgba(255,255,255,.8); font-size: 13px; }
-  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .facts div { background: rgba(0,0,0,.3); border-radius: 12px; padding: 7px 10px; }
-  .facts b { display: block; font-size: 15px; }
-  .facts span { font-size: 11px; color: rgba(255,255,255,.75); }
-  .why { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; }
+  .sugg-body { padding: 14px 16px 16px; display: grid; gap: 8px; }
+  .sugg-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .sugg h3 { margin: 0; font-size: 21px; line-height: 1.1; text-transform: uppercase; font-weight: 800; letter-spacing: -.01em; }
+  .pct { flex: none; padding: 5px 10px; border-radius: 99px; font-size: 13px; font-weight: 800;
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent-text); }
+  .sub { color: var(--muted); font-size: 13.5px; }
+  .editions { font-size: 12.5px; color: var(--accent-text); font-weight: 600; }
+  .why { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
   .why li { display: flex; gap: 8px; }
-  .why li::before { content: "✓"; color: #e2b48f; font-weight: 800; }
-  .energy { margin-top: auto; font-size: 10.5px; line-height: 1.4; color: rgba(255,255,255,.72); border-top: 1px solid rgba(255,255,255,.15); padding-top: 7px; }
-  .editions { font-size: 12px; color: #e2b48f; font-weight: 600; }
-  .stamp { position: absolute; top: 64px; padding: 4px 14px; border: 3px solid; border-radius: 12px; font-weight: 900;
-    font-size: 28px; letter-spacing: .08em; pointer-events: none; background: rgba(0,0,0,.35); z-index: 2; }
-  .stamp.like { left: 20px; color: #6fd3a0; transform: rotate(-14deg); opacity: var(--like-o, 0); }
-  .stamp.nope { right: 20px; color: #ff6b7a; transform: rotate(14deg); opacity: var(--nope-o, 0); }
-  .swipe-actions { display: flex; justify-content: center; align-items: center; gap: 28px; margin-top: 10px; }
-  .round { width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
-    font-size: 24px; cursor: pointer; display: grid; place-items: center; transition: transform .15s; }
-  .round:active { transform: scale(.88); }
-  .round.nope { color: var(--nope); }
-  .round.like { color: #fff; width: 78px; height: 78px; font-size: 32px; border: 0; background: linear-gradient(135deg, #c8875a, #8a4f2a);
-    box-shadow: 0 12px 26px rgba(176,112,63,.45); }
-  .bump { animation: bump .35s ease; }
-  @keyframes bump { 50% { transform: scale(1.2); } }
-
-  /* matches */
-  .list { display: grid; gap: 12px; }
-  .match { display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 20px; cursor: pointer; text-align: left; width: 100%; transition: transform .15s, border-color .15s; }
-  .match:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .thumb { width: 88px; height: 60px; border-radius: 14px; background: var(--studio); flex: none; display: grid; place-items: center; overflow: hidden; }
-  .thumb svg { width: 72px; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
-  .match b { display: block; }
-  .match small { color: var(--muted); }
-  .match .go { margin-left: auto; color: var(--accent-text); font-weight: 750; white-space: nowrap; }
-
-  /* mission */
-  .hero-car { border-radius: 24px; padding: 14px; color: #fff; background: linear-gradient(165deg, var(--c1) 30%, var(--c2)); display: grid; gap: 4px; box-shadow: var(--shadow-lg); }
-  .hero-car h2 { margin: 0; font-size: 24px; letter-spacing: -.01em; text-transform: uppercase; }
-  .hero-img { width: 100%; height: 170px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; background: var(--studio); }
-  .credit { font-size: 11px; color: rgba(255,255,255,.75); }
-  .tip { padding: 14px 16px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
-  .tip p { margin: 6px 0 0; }
-  .mission { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-  .mission li { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
-  .mission .num { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--on-accent);
-    font-weight: 800; font-size: 14px; display: grid; place-items: center; flex: none; }
-  .mission b { display: block; }
-  .mission small { color: var(--muted); }
+  .why li::before { content: "✓"; color: var(--accent); font-weight: 800; }
+  .energy { font-size: 11px; line-height: 1.4; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; }
   .source { font-size: 11.5px; color: var(--muted); margin: 0; }
 
   /* booking */
+  .car-row { display: flex; gap: 12px; align-items: center; padding: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+  .thumb { width: 104px; height: 68px; border-radius: 12px; background: var(--studio); flex: none; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+  .car-row b { display: block; text-transform: uppercase; font-weight: 800; }
+  .car-row small { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; }
+  .tip { padding: 14px 16px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+  .tip p { margin: 6px 0 0; }
   .dealer { padding: 16px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; display: grid; gap: 10px; }
   .dealer.active { border-color: var(--accent); }
   .dealer small { color: var(--muted); }
@@ -241,6 +200,7 @@
   .plz-input { font-size: 22px !important; letter-spacing: .18em; font-weight: 700 !important; }
   .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); cursor: pointer; }
   .consent input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 2px 0 0; }
+  .list { display: grid; gap: 12px; }
   .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
 
   /* ticket (boarding-pass look) */
@@ -259,6 +219,12 @@
   .ticket-rows b { text-align: right; }
   .celebrate { text-align: center; }
   .celebrate .title { font-size: 26px; text-transform: uppercase; }
+  .plan { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .plan li { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+  .plan .num { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--on-accent);
+    font-weight: 800; font-size: 14px; display: grid; place-items: center; flex: none; }
+  .plan b { display: block; }
+  .plan small { color: var(--muted); }
 
   /* playful effects */
   .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
@@ -290,22 +256,20 @@
       <p class="eyebrow">Match/Meet for CUPRA</p>
       <h1><span>Dein nächster CUPRA.</span><strong>In zwei Minuten gematcht.</strong></h1>
       <div class="rule"></div>
-      <p class="lead">Sechs Fragen antippen, Modelle swipen und mit persönlicher Mission zur Probefahrt beim CUPRA-Partner.</p>
+      <p class="lead">Sechs Fragen antippen, passende Modelle sehen und direkt eine Probefahrt beim CUPRA-Partner buchen.</p>
     </div>
     <figure class="hero-visual"><img src="/assets/cupra/terramar.webp" alt="CUPRA Terramar"></figure>
     <button class="resume" id="resume-btn" hidden><span>↩︎ Weiter, wo du warst</span><span>→</span></button>
     <ol class="steps">
       <li><span>01</span><div><b>Alltag antippen</b><small>6 Fragen, 30 Sekunden</small></div></li>
-      <li><span>02</span><div><b>Modelle swipen</b><small>Die CUPRA-Modelle, die zu dir passen</small></div></li>
-      <li><span>03</span><div><b>Mit Plan probefahren</b><small>Deine Mission beim CUPRA-Partner in der Nähe</small></div></li>
+      <li><span>02</span><div><b>Vorschläge ansehen</b><small>Die CUPRA-Modelle, die zu dir passen</small></div></li>
+      <li><span>03</span><div><b>Probefahrt buchen</b><small>Beim CUPRA-Partner in deiner Nähe</small></div></li>
     </ol>
     <button class="btn big" id="start-btn" disabled>Match starten</button>
     <div class="models">
       <p class="eyebrow">Die Modelle</p>
       <div class="model-strip" id="model-strip"></div>
     </div>
-    <p class="disclaimer">Konzeptstudie (Studienprojekt UFENA1). Kein offizielles Angebot von CUPRA. Bilder: CUPRA.<br>
-      Verbrauchs- und CO₂-Angaben auf den Modellkarten. 🔒 Dein Profil geht nur mit deiner Zustimmung an den CUPRA-Partner.</p>
   </section>
 
   <!-- 2 Quiz -->
@@ -331,69 +295,31 @@
     </div>
   </section>
 
-  <!-- 2b Team reveal -->
-  <section class="view" id="v-team" hidden>
+  <!-- 3 Driving profile + suggestions -->
+  <section class="view" id="v-results" hidden>
     <div class="team">
       <div class="team-emoji" id="team-emoji"></div>
       <span class="eyebrow">Dein Fahrprofil</span>
       <h2 class="title" id="team-name"></h2>
       <p id="team-text"></p>
-      <div class="tags" id="team-tags" style="justify-content:center;margin-top:8px"></div>
+      <div class="tags" id="team-tags"></div>
     </div>
-    <p class="muted" style="text-align:center;margin:0" id="team-count"></p>
-    <div class="spacer"></div>
-    <button class="btn big" id="team-go">Zeig mir meine Matches</button>
-  </section>
-
-  <!-- 3 Swipe -->
-  <section class="view" id="v-swipe" hidden>
-    <div class="subbar">
-      <span class="badge" id="like-count">❤️ 0 Matches</span>
-      <span class="badge" id="swipe-count">1 / 8</span>
+    <div class="section-head">
+      <h2>Deine Vorschläge</h2>
+      <button class="link" id="redo-quiz">↺ Quiz neu</button>
     </div>
-    <div class="stack" id="stack"></div>
-    <div class="swipe-actions">
-      <button class="round nope" id="nope-btn" aria-label="Passt nicht">✖</button>
-      <button class="round like" id="like-btn" aria-label="Match">❤</button>
-    </div>
-    <p class="fineprint">Nach rechts wischen = Match · nach links = weiter</p>
-  </section>
-
-  <!-- 4a Matches -->
-  <section class="view" id="v-matches" hidden>
-    <div class="subbar">
-      <button class="link" id="reswipe">↺ Nochmal swipen</button>
-    </div>
-    <h2 class="title" id="matches-title">Deine Matches</h2>
-    <p class="muted" id="matches-note" style="margin:-8px 0 0">Wähle ein Modell für deine Probefahrt-Mission.</p>
-    <div class="list" id="match-list"></div>
+    <div class="results" id="results"></div>
     <p class="source">Verbrauchs- und Emissionswerte nach WLTP, Herstellerangaben. Preise und Masse sind Beispielwerte.</p>
   </section>
 
-  <!-- 4b Mission -->
-  <section class="view" id="v-mission" hidden>
-    <div class="subbar">
-      <button class="link" data-go="v-matches">← Matches</button>
-      <span class="badge">🗺️ Mission freigeschaltet</span>
-    </div>
-    <div class="hero-car" id="mission-car"></div>
-    <div>
-      <h2 class="title">Deine Probefahrt-Mission</h2>
-      <p class="muted" style="margin:6px 0 0">Das testest du beim CUPRA-Partner, damit deine Fragen wirklich beantwortet werden.</p>
-    </div>
-    <div class="tip"><b>✨ Match-Tipp</b><p id="tip-text"></p></div>
-    <ol class="mission" id="mission-list"></ol>
-    <p class="source" id="mission-source"></p>
-    <div class="spacer"></div>
-    <button class="btn big" id="to-booking">Probefahrt buchen</button>
-  </section>
-
-  <!-- 5a Booking -->
+  <!-- 4 Booking -->
   <section class="view" id="v-booking" hidden>
     <div class="subbar">
-      <button class="link" data-go="v-mission">← Mission</button>
+      <button class="link" data-go="v-results">← Vorschläge</button>
     </div>
-    <h2 class="title" id="booking-title">Termin wählen</h2>
+    <h2 class="title">Probefahrt buchen</h2>
+    <div class="car-row" id="booking-car"></div>
+    <div class="tip" id="booking-tip" hidden><b>✨ Match-Tipp</b><p id="tip-text"></p></div>
     <label class="field"><span class="muted">📍 Deine PLZ: Wir zeigen dir die nächsten CUPRA-Partner</span>
       <input id="plz" class="plz-input" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="z. B. 8400"></label>
     <p class="muted" id="plz-info" hidden style="margin:0"></p>
@@ -401,21 +327,22 @@
     <div id="booking-form" class="list" hidden>
       <label class="field"><span class="muted">Dein Vorname</span><input id="vorname" maxlength="40" autocomplete="given-name" placeholder="z. B. Lea oder Luca"></label>
       <label class="consent"><input type="checkbox" id="consent" checked>
-        <span>Der CUPRA-Partner darf mein Kurzprofil (Alltag, Wünsche, offene Fragen) und meine Mission sehen, damit er sich vorbereiten kann.</span></label>
+        <span>Der CUPRA-Partner darf mein Kurzprofil (Alltag, Wünsche, offene Fragen) und meinen Probefahrt-Plan sehen, damit er sich vorbereiten kann.</span></label>
       <button class="btn big" id="book-btn">Verbindlich buchen</button>
       <p class="fineprint">Kostenlos für dich. Der Partner bezahlt die Plattform.</p>
     </div>
   </section>
 
-  <!-- 5b Ticket -->
+  <!-- 5 Ticket -->
   <section class="view" id="v-ticket" hidden>
     <div class="celebrate">
       <h2 class="title">Probefahrt gebucht</h2>
       <p class="muted" style="margin:6px 0 0">Zeig das Ticket beim CUPRA-Partner, dann geht's los. 🎉</p>
     </div>
     <div class="ticket" id="ticket"></div>
-    <h2 class="title" style="font-size:22px">Deine Mission für den Termin</h2>
-    <ol class="mission" id="ticket-mission"></ol>
+    <h2 class="title" style="font-size:22px">Dein Probefahrt-Plan</h2>
+    <p class="muted" style="margin:-8px 0 0">Das testest du beim Termin, damit deine Fragen beantwortet werden.</p>
+    <ol class="plan" id="ticket-plan"></ol>
     <button class="btn ghost" id="restart">Neues Match starten</button>
   </section>
 
@@ -425,8 +352,8 @@
 <script>
 const $ = (sel) => document.querySelector(sel);
 const state = { quiz: [], step: 0, selection: {}, advancing: false,
-                profile: null, cars: [], index: 0, liked: [], animating: false,
-                car: null, mission: [], dealer: null, slot: null, plz: '', dealerRequest: 0, lastView: '' };
+                profile: null, cars: [], car: null, mission: [], missionRequest: null,
+                dealer: null, slot: null, plz: '', dealerRequest: 0, lastView: '' };
 
 const PARKEN = { eng: 'Enge Tiefgarage', strasse: 'Parkt an der Strasse', eigener_platz: 'Eigener Parkplatz' };
 const LADEN = { zuhause: 'Laden zuhause', arbeit: 'Laden bei der Arbeit', nein: 'Keine Lademöglichkeit' };
@@ -530,20 +457,12 @@ function flyEmoji(el, emoji) {
   setTimeout(() => s.remove(), 950);
 }
 
-function bump(el) {
-  el.classList.remove('bump');
-  void el.offsetWidth;
-  el.classList.add('bump');
-}
-
 /* ---------- car rendering ---------- */
-
-function carColors(car) { return `--c1:${car.farbe[0]};--c2:${car.farbe[1]}`; }
 
 function carSvg(car) {
   const tall = /SUV|Crossover|Van/.test(car.segment) ? 'transform="translate(0 90) scale(1 1.14) translate(0 -90)"' : '';
   return `<svg viewBox="0 0 300 116" aria-hidden="true">
-    <ellipse cx="154" cy="110" rx="132" ry="5" fill="rgba(0,0,0,.35)"/>
+    <ellipse cx="154" cy="110" rx="132" ry="5" fill="rgba(0,0,0,.25)"/>
     <g ${tall}>
       <path d="M20 78 C20 66 28 60 42 58 L88 54 C104 38 122 28 150 26 L196 26 C218 26 236 40 252 54 L270 58 C282 60 288 66 288 76 L288 84 C288 88 285 90 281 90 L262 90 A26 26 0 0 0 210 90 L96 90 A26 26 0 0 0 44 90 L26 90 C22 90 20 88 20 84 Z" fill="rgba(40,40,40,.85)"/>
       <path d="M100 54 C114 42 128 34 150 33 L176 33 L176 54 Z" fill="#9aa3b5" opacity=".7"/>
@@ -556,10 +475,11 @@ function carSvg(car) {
 }
 
 // Studio photo (CUPRA) or free Wikimedia photo with credit; the drawn silhouette is the fallback.
-function carArt(car) {
-  if (!car.bild_url) return `<figure class="photo broken">${carSvg(car)}</figure>`;
+function carArt(car, ribbon) {
+  const label = ribbon ? `<span class="ribbon">${esc(ribbon)}</span>` : '';
+  if (!car.bild_url) return `<figure class="photo broken">${carSvg(car)}${label}</figure>`;
   return `<figure class="photo"><img src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" loading="lazy"
-    draggable="false" onerror="this.parentElement.classList.add('broken')">${carSvg(car)}
+    onerror="this.parentElement.classList.add('broken')">${carSvg(car)}${label}
     <figcaption>${esc(car.bild_quelle || '')}</figcaption></figure>`;
 }
 
@@ -567,14 +487,6 @@ function carArt(car) {
 function energyLine(car) {
   if (!car.verbrauch) return 'Verbrauchs- und CO₂-Angaben beim CUPRA-Partner';
   return `Verbrauch ${car.verbrauch} · CO₂ ${car.co2} · CO₂-Klasse ${car.co2_klasse}`;
-}
-
-function carFacts(car) {
-  const reach = car.antrieb === 'Plug-in-Hybrid'
-    ? [car.e_reichweite_km + ' km', 'elektrisch']
-    : [car.reichweite_km + ' km', car.antrieb === 'Elektro' ? 'Reichweite' : 'Reichweite Tank'];
-  const third = car.sitze >= 7 ? [car.sitze, 'Sitze'] : [(car.laenge_mm / 1000).toFixed(2) + ' m', 'Länge'];
-  return [reach, [car.kofferraum_l + ' l', 'Kofferraum'], third];
 }
 
 function profileTags(p) {
@@ -606,7 +518,7 @@ function renderStep() {
   $('#quiz-q').textContent = step.frage;
   $('#quiz-hint').textContent = step.hinweis || '';
   $('#quiz-hint').hidden = !step.hinweis;
-  $('#quiz-next').textContent = last ? 'Mein Profil zeigen' : 'Weiter';
+  $('#quiz-next').textContent = last ? 'Vorschläge zeigen' : 'Weiter';
 
   const body = $('#quiz-body');
   body.classList.remove('enter');
@@ -699,23 +611,17 @@ function teamFor(s) {
   return TEAMS.pendler;
 }
 
-/* ---------- matching & swipe ---------- */
+/* ---------- driving profile & suggestions ---------- */
 
 async function findMatches() {
   show('v-loading');
-  setLoading('Wir suchen deine Matches …', 'Aus allen CUPRA-Modellen, passend zu deinem Alltag');
+  setLoading('Wir suchen deine Vorschläge …', 'Aus allen CUPRA-Modellen, passend zu deinem Alltag');
   try {
     const [p] = await Promise.all([api('/api/profile', { auswahl: state.selection }), wait(900)]);
     state.profile = p.profil;
-    const m = await api('/api/matches', { profile: state.profile });
-    Object.assign(state, { cars: m.cars, index: 0, liked: [] });
-    const [emoji, name, text] = teamFor(state.selection);
-    $('#team-emoji').textContent = emoji;
-    $('#team-name').textContent = name;
-    $('#team-text').textContent = text;
-    $('#team-tags').innerHTML = profileTags(state.profile).map(t => `<span>${esc(t)}</span>`).join('');
-    $('#team-count').textContent = `${m.cars.length} CUPRA-Modelle warten auf dein Swipe.`;
-    show('v-team');
+    state.cars = (await api('/api/matches', { profile: state.profile })).cars;
+    renderResults();
+    show('v-results');
     confetti();
   } catch (e) {
     toast(e.message);
@@ -723,164 +629,69 @@ async function findMatches() {
   }
 }
 
-function startSwipe() {
-  Object.assign(state, { index: 0, liked: [] });
-  renderStack();
-  show('v-swipe');
-}
-
-function cardHtml(car) {
-  const editions = car.editionen && car.editionen.length ? `<div class="editions">Auch als ${esc(car.editionen.join(' / '))}</div>` : '';
-  return `
-    <div class="card-top"><span class="brand">${esc(car.marke)}</span><span class="pct">${car.match_pct}% Match</span></div>
-    ${carArt(car)}
-    <h3>${esc(car.modell)}</h3>
-    <div class="sub">${esc(car.leistung || car.antrieb)} · ${esc(car.segment)} · <b>ab ${chf(car.preis_chf)}</b></div>
-    ${editions}
-    <div class="facts">${carFacts(car).map(([v, l]) => `<div><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>
-    <ul class="why">${car.gruende.map(g => `<li>${esc(g)}</li>`).join('')}</ul>
-    <div class="energy">${esc(energyLine(car))}</div>
-    <div class="stamp like">MATCH</div><div class="stamp nope">NOPE</div>`;
-}
-
-function renderStack() {
-  const stack = $('#stack');
-  stack.innerHTML = '';
-  const n = state.liked.length;
-  $('#like-count').textContent = `❤️ ${n} Match${n === 1 ? '' : 'es'}`;
-  const remaining = state.cars.slice(state.index, state.index + 3);
-  if (!remaining.length) return finishSwipe();
-  remaining.slice().reverse().forEach((car, i, arr) => {
+function renderResults() {
+  const [emoji, name, text] = teamFor(state.selection);
+  $('#team-emoji').textContent = emoji;
+  $('#team-name').textContent = name;
+  $('#team-text').textContent = text;
+  $('#team-tags').innerHTML = profileTags(state.profile).map(t => `<span>${esc(t)}</span>`).join('');
+  const list = $('#results');
+  list.innerHTML = '';
+  if (!state.cars.length) {
+    list.innerHTML = '<div class="empty">Keine passenden Modelle gefunden. Versuch es mit einem höheren Budget.</div>';
+    return;
+  }
+  state.cars.forEach((car, i) => {
     const el = document.createElement('article');
-    el.className = 'card';
-    el.style.cssText = carColors(car);
-    const depth = arr.length - 1 - i;
-    el.style.setProperty('--depth', depth);
-    el.innerHTML = cardHtml(car);
-    if (depth === 0) { el.dataset.top = '1'; attachDrag(el); }
-    stack.append(el);
+    el.className = 'sugg' + (i === 0 ? ' top' : '');
+    el.style.animationDelay = Math.min(i, 6) * 0.06 + 's';
+    const editions = car.editionen && car.editionen.length ? `<div class="editions">Auch als ${esc(car.editionen.join(' / '))}</div>` : '';
+    el.innerHTML = `${carArt(car, i === 0 ? 'Top-Match' : '')}
+      <div class="sugg-body">
+        <div class="sugg-head"><h3>${esc(car.modell)}</h3><span class="pct">${car.match_pct}%</span></div>
+        <div class="sub">${esc(car.leistung || car.antrieb)} · ${esc(car.segment)} · <b>ab ${chf(car.preis_chf)}</b></div>
+        ${editions}
+        <ul class="why">${car.gruende.slice(0, 2).map(g => `<li>${esc(g)}</li>`).join('')}</ul>
+        <div class="energy">${esc(energyLine(car))}</div>
+        <button class="btn" type="button">Probefahrt buchen</button>
+      </div>`;
+    el.querySelector('.btn').onclick = () => openBooking(car);
+    list.append(el);
   });
-  $('#swipe-count').textContent = `${state.index + 1} / ${state.cars.length}`;
-}
-
-function attachDrag(el) {
-  let startX = 0, startY = 0, dx = 0, dragging = false;
-  el.addEventListener('pointerdown', (e) => {
-    dragging = true; dx = 0; startX = e.clientX; startY = e.clientY;
-    el.setPointerCapture(e.pointerId);
-    el.style.transition = 'none';
-  });
-  el.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    dx = e.clientX - startX;
-    const dy = (e.clientY - startY) * 0.3;
-    el.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 18}deg)`;
-    el.style.setProperty('--like-o', Math.max(0, Math.min(1, dx / 100)));
-    el.style.setProperty('--nope-o', Math.max(0, Math.min(1, -dx / 100)));
-  });
-  const end = () => {
-    if (!dragging) return;
-    dragging = false;
-    el.style.transition = '';
-    if (Math.abs(dx) > 100) return decide(dx > 0);
-    el.style.transform = '';
-    el.style.setProperty('--like-o', 0);
-    el.style.setProperty('--nope-o', 0);
-  };
-  el.addEventListener('pointerup', end);
-  el.addEventListener('pointercancel', end);
-}
-
-function decide(like) {
-  const el = $('#stack .card[data-top]');
-  if (!el || state.animating) return;
-  state.animating = true;
-  if (like) {
-    state.liked.push(state.cars[state.index]);
-    track('swipe_like');
-    flyEmoji($('#like-btn'), '❤️');
-    bump($('#like-count'));
-  }
-  el.style.setProperty(like ? '--like-o' : '--nope-o', 1);
-  el.style.transition = 'transform .35s ease, opacity .35s ease';
-  el.style.transform = `translate(${like ? 520 : -520}px, 40px) rotate(${like ? 24 : -24}deg)`;
-  el.style.opacity = '0';
-  setTimeout(() => { state.index++; state.animating = false; renderStack(); }, 300);
-}
-
-function finishSwipe() {
-  let list = state.liked;
-  if (!list.length) {
-    list = state.cars.slice(0, 3);
-    $('#matches-title').textContent = 'Deine Top 3';
-    $('#matches-note').textContent = 'Kein Herz vergeben? Kein Problem, diese Modelle passen laut deinem Profil am besten.';
-  } else {
-    $('#matches-title').textContent = `${list.length} Match${list.length === 1 ? '' : 'es'} 🎉`;
-    $('#matches-note').textContent = 'Wähle ein Modell für deine Probefahrt-Mission.';
-    confetti();
-  }
-  $('#match-list').innerHTML = '';
-  list.forEach(car => {
-    const b = document.createElement('button');
-    b.className = 'match';
-    const thumb = car.bild_url ? `<img src="${esc(car.bild_url)}" alt="" loading="lazy" onerror="this.remove()">` : carSvg(car);
-    b.innerHTML = `<div class="thumb">${thumb}</div>
-      <div><b>${esc(car.modell)}</b><small>${car.match_pct}% Match · ab ${chf(car.preis_chf)}</small></div>
-      <span class="go">Mission →</span>`;
-    b.onclick = () => openMission(car);
-    $('#match-list').append(b);
-  });
-  show('v-matches');
-}
-
-/* ---------- mission ---------- */
-
-// Read-only numbered list: the mission is a plan to take along, not a form.
-function missionHtml(items) {
-  return items.map((it, i) => `<li><span class="num">${i + 1}</span>
-    <div><b>${esc(it.titel)}</b><small>${esc(it.warum)}</small></div></li>`).join('');
-}
-
-async function openMission(car) {
-  state.car = car;
-  let source = '';
-  $('#tip-text').textContent = '';
-  try {
-    const r = await api('/api/mission', { profile: state.profile, car_id: car.id });
-    state.mission = r.items;
-    $('#tip-text').textContent = r.tipp;
-    source = 'Aus deinem Profil erstellt · Verbrauchs- und Emissionswerte nach WLTP, Herstellerangaben';
-  } catch (e) {
-    state.mission = [];
-    toast(e.message);
-  }
-  const photo = car.bild_url ? `<img class="hero-img" src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" onerror="this.remove()">` : '';
-  const credit = car.bild_link
-    ? `<a class="credit" href="${esc(car.bild_link)}" target="_blank" rel="noopener">${esc(car.bild_quelle)}</a>`
-    : `<span class="credit">${esc(car.bild_quelle || '')}</span>`;
-  $('#mission-car').style.cssText = carColors(car);
-  $('#mission-car').innerHTML = `${photo}<span class="brand">${esc(car.marke)} · ${car.match_pct}% Match</span>
-    <h2>${esc(car.modell)}</h2><div class="sub">${esc(car.leistung || car.antrieb)} · ab ${chf(car.preis_chf)}</div>
-    <div class="energy" style="margin-top:6px">${esc(energyLine(car))}</div>${credit}`;
-  $('#mission-list').innerHTML = missionHtml(state.mission);
-  $('#mission-source').textContent = source;
-  show('v-mission');
-  track('mission_open');
 }
 
 /* ---------- booking ---------- */
 
-function openBooking() {
-  const car = state.car;
-  state.dealer = null; state.slot = null;
-  $('#booking-title').textContent = `${car.modell} probefahren`;
+// Read-only numbered list: the plan is something to take along, not a form.
+function planHtml(items) {
+  return items.map((it, i) => `<li><span class="num">${i + 1}</span>
+    <div><b>${esc(it.titel)}</b><small>${esc(it.warum)}</small></div></li>`).join('');
+}
+
+function openBooking(car) {
+  Object.assign(state, { car, mission: [], dealer: null, slot: null });
+  const thumb = car.bild_url ? `<img src="${esc(car.bild_url)}" alt="" onerror="this.remove()">` : '';
+  $('#booking-car').innerHTML = `<div class="thumb">${thumb}</div>
+    <div><b>${esc(car.modell)}</b><small>${esc(car.leistung || car.antrieb)} · ab ${chf(car.preis_chf)}</small>
+    <small>${esc(energyLine(car))}</small></div>`;
+  $('#booking-tip').hidden = true;
   $('#dealer-list').innerHTML = '';
   $('#booking-form').hidden = true;
   $('#plz-info').hidden = true;
   show('v-booking');
+  track('mission_open');
   $('#plz').value = state.plz;
   if (state.plz) loadDealers();
   else $('#plz').focus();
+  // Tip and test-drive plan load in the background; the plan goes to the partner and onto the ticket.
+  state.missionRequest = api('/api/mission', { profile: state.profile, car_id: car.id })
+    .then(r => {
+      if (state.car !== car) return;
+      state.mission = r.items;
+      $('#tip-text').textContent = r.tipp;
+      $('#booking-tip').hidden = false;
+    })
+    .catch(() => {});
 }
 
 async function loadDealers() {
@@ -911,7 +722,7 @@ async function loadDealers() {
   list.innerHTML = '';
   $('#booking-form').hidden = !r.dealers.length;
   if (!r.dealers.length) {
-    list.innerHTML = '<div class="empty">Noch kein CUPRA-Partner auf der Plattform.<br>Wähle ein anderes Match.</div>';
+    list.innerHTML = '<div class="empty">Noch kein CUPRA-Partner auf der Plattform.<br>Wähle einen anderen Vorschlag.</div>';
   }
   r.dealers.forEach(d => {
     const box = document.createElement('div');
@@ -939,6 +750,7 @@ async function book() {
   if (!vorname) return toast('Bitte gib deinen Vornamen ein');
   $('#book-btn').disabled = true;
   try {
+    await state.missionRequest; // make sure the plan is included when the booking is sent
     const b = await api('/api/bookings', {
       car_id: state.car.id, dealer_id: state.dealer.id, slot: state.slot.id, vorname,
       consent: $('#consent').checked, profile: state.profile, mission: state.mission });
@@ -967,7 +779,7 @@ function renderTicket(b) {
         <div><span>Kurzprofil</span><b>${b.profil_freigabe ? 'geteilt ✓' : 'nicht geteilt'}</b></div>
       </div>
     </div>`;
-  $('#ticket-mission').innerHTML = missionHtml(state.mission);
+  $('#ticket-plan').innerHTML = planHtml(state.mission);
 }
 
 /* ---------- wiring ---------- */
@@ -980,13 +792,9 @@ $('#home-btn').onclick = () => show('v-start');
 $('#resume-btn').onclick = () => show(state.lastView);
 $('#theme-btn').onclick = toggleTheme;
 $('#start-btn').onclick = startQuiz;
+$('#redo-quiz').onclick = startQuiz;
 $('#quiz-back').onclick = prevStep;
 $('#quiz-next').onclick = nextStep;
-$('#team-go').onclick = startSwipe;
-$('#like-btn').onclick = () => decide(true);
-$('#nope-btn').onclick = () => decide(false);
-$('#reswipe').onclick = startSwipe;
-$('#to-booking').onclick = openBooking;
 $('#plz').oninput = () => {
   const input = $('#plz');
   input.value = input.value.replace(/\D/g, '').slice(0, 4);
@@ -994,11 +802,6 @@ $('#plz').oninput = () => {
 };
 $('#book-btn').onclick = book;
 $('#restart').onclick = () => { state.lastView = ''; startQuiz(); };
-document.addEventListener('keydown', (e) => {
-  if ($('#v-swipe').hidden) return;
-  if (e.key === 'ArrowRight') decide(true);
-  if (e.key === 'ArrowLeft') decide(false);
-});
 
 applyTheme(document.documentElement.dataset.theme);
 (async () => {

@@ -146,7 +146,7 @@ function briefHtml(b) {
   return `<div class="brief">
     <div><h3>Kurzprofil</h3><dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
     <div><h3>Offene Fragen: bitte vorbereiten</h3><div class="questions">${questions}</div></div>
-    <div><h3>Probefahrt-Mission des Kunden</h3><ol>${mission}</ol></div>
+    <div><h3>Probefahrt-Plan des Kunden</h3><ol>${mission}</ol></div>
   </div>`;
 }
 
@@ -166,7 +166,7 @@ function renderBookings(list) {
         ${b.status === 'gebucht' ? `<button class="btn small" data-checkin="${esc(b.code)}">Manuell einchecken</button>` : ''}
       </div>
       <details data-code="${esc(b.code)}" ${openCodes.has(b.code) ? 'open' : ''}>
-        <summary>Kurzprofil &amp; Mission ansehen</summary>${briefHtml(b)}
+        <summary>Kurzprofil &amp; Plan ansehen</summary>${briefHtml(b)}
       </details>
     </article>`).join('');
   box.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => {

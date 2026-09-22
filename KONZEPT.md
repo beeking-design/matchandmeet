@@ -1,31 +1,31 @@
-# Match & Meet – Vom Swipe zur Probefahrt
+# Match & Meet – Vom Match zur Probefahrt
 
 > Studienprojekt UFENA1, Gruppe 2 · Arbeitsversion 14.09.2026
 > **Alle Finanzzahlen, Marktgrössen und Vertriebsziele sind Planungsannahmen und müssen validiert werden.**
 
 ## Die Idee in einem Satz
-Junge Autokäufer finden per **Antipp-Quiz und Swipe** in zwei Minuten passende Modelle **aller Marken**, bekommen eine **persönliche Probefahrt-Mission** und buchen direkt beim Händler in der Nähe. Der **Händler zahlt nur, wenn der Kunde wirklich zur Probefahrt erscheint**.
+Junge Autokäufer finden per **Antipp-Quiz** in zwei Minuten passende Modelle **aller Marken**, bekommen einen **persönlichen Probefahrt-Plan** und buchen direkt beim Händler in der Nähe. Der **Händler zahlt nur, wenn der Kunde wirklich zur Probefahrt erscheint**.
 
 ## Was macht die Idee besonders?
 | Baustein | Was es ist | Warum es zählt |
 |---|---|---|
-| **Swipe-Matching** | Passende Modelle als Karten, wischen wie bei einer Dating-App (❤️ / ✖) | Spielerisch, passt zur Zielgruppe und zum Namen „Match“. Jede Karte begründet, *warum* das Auto zum Alltag passt. |
-| **Probefahrt-Mission** | Die KI macht aus dem Chat eine persönliche Checkliste: „Fahr in deine Tiefgarage“, „Lade den Kinderwagen ein“, „Frag nach der Ladezeit an deiner Wallbox“ | Aus einer Spazierfahrt wird ein Test, der die *eigenen* Fragen beantwortet. Das gibt eine sichere Entscheidung. |
+| **Vorschläge mit Begründung** | Direkt nach dem Quiz: Fahrprofil („Team …“) und passende Modelle mit Match-% | Schnell und verständlich, passt zum Namen „Match“. Jede Karte begründet, *warum* das Auto zum Alltag passt. |
+| **Probefahrt-Plan** | Aus den Quiz-Antworten entsteht eine persönliche Checkliste: „Fahr in deine Tiefgarage“, „Lade den Kinderwagen ein“, „Frag nach der Ladezeit an deiner Wallbox“ | Aus einer Spazierfahrt wird ein Test, der die *eigenen* Fragen beantwortet. Das gibt eine sichere Entscheidung. |
 | **Kurzprofil für den Händler** | Der Berater sieht vorab Bedürfnisse und offene Fragen, nur mit Zustimmung des Kunden | Gespräch auf Augenhöhe statt Standard-Verkaufspitch |
 | **Pay-per-Drive** | Abrechnung nur bei bestätigtem Check-in vor Ort | Null Risiko für Händler, damit leichter Markteintritt |
 | **Datenschutz-KI** (Ausbaustufe Pilot) | Eigene KI (Open-Source-Modell via Ollama) auf eigener Infrastruktur in der Schweiz | Keine Kundendaten an US-Clouds (nDSG/DSGVO). Die KI erfindet keine Fahrzeugdaten, weil sie nur mit geprüften Daten arbeitet. |
 
 ## Customer Journey
-1. **Einstieg:** QR-Code im Showroom/auf dem Plakat, TikTok/Instagram-Video („Swipe dein nächstes Auto“), Link auf der Händler-Website
+1. **Einstieg:** QR-Code im Showroom/auf dem Plakat, TikTok/Instagram-Video („Finde dein nächstes Auto in 2 Minuten“), Link auf der Händler-Website
 2. **Antipp-Quiz (≈ 30 Sek.):** 6 Fragen mit grossen Kacheln zu Alltag, Budget (Schieberegler), Parken, Laden, Mitfahrern und dem, was man bei der Probefahrt klären will. Keine Tipparbeit.
-3. **Swipe:** 8 Modelle verschiedener Marken, jede Karte mit „Match-%“ und Begründung
-4. **Mission:** ein Match wählen, danach erstellt die KI eine persönliche Probefahrt-Checkliste
+3. **Vorschläge:** Fahrprofil und passende Modelle mit „Match-%“, Begründung und Verbrauchsangaben
+4. **Probefahrt buchen:** Modell wählen; dazu entsteht ein persönlicher Probefahrt-Plan (Checkliste)
 5. **Buchen:** Händler in der Nähe und Termin wählen, Vorname eingeben, Zustimmung zum Kurzprofil geben. Dann gibt es ein Ticket mit QR-Code.
 6. **Meet:** Der Berater scannt beim Händler den QR-Code. Damit ist die Probefahrt **qualifiziert** und wird abgerechnet.
 
 ## MVP (Online-Prototyp)
-- **Bewusst ohne KI:** Antipp-Quiz, regelbasiertes Matching, Mission und Tipp. Antwortet sofort, kostet nichts und erfindet keine Fahrzeugdaten. Tests mit einer lokalen KI (Ollama) brauchten 17–110 Sekunden pro Antwort.
-- **Was der MVP beweisen soll:** Buchen junge Kunden über Swipe und Mission? Erscheinen sie? Zahlen Garagen dafür? Die KI ist nicht die riskante Annahme.
+- **Bewusst ohne KI:** Antipp-Quiz, regelbasiertes Matching, Probefahrt-Plan und Tipp. Antwortet sofort, kostet nichts und erfindet keine Fahrzeugdaten. Tests mit einer lokalen KI (Ollama) brauchten 17–110 Sekunden pro Antwort.
+- **Was der MVP beweisen soll:** Buchen junge Kunden über Quiz und Vorschläge? Erscheinen sie? Zahlen Garagen dafür? Die KI ist nicht die riskante Annahme.
 - **Drei Bereiche:** Kunden-App, Garagenportal (Login mit Zugangscode, Check-in, Abrechnung), Entwicklerkonsole (Funnel, Abrechnung pro Monat, Garagen und Fahrzeugdaten verwalten)
 - **Garage in der Nähe:** Der Kunde gibt bei der Buchung seine PLZ ein und sieht die nächsten Garagen mit Distanz. In der Pilotregion (Kanton Zürich und Aargau Ost) ist jede Marke im Umkreis von 20 km erreichbar (fiktive Beispiel-Garagen).
 - **White-Label für Hersteller:** Die Kunden-App läuft als „MATCH/MEET for CUPRA“: nur CUPRA-Modelle (17 Varianten mit Verbrauchs- und CO₂-Angaben), CUPRA-Farben, nur CUPRA-Partner. Dieselbe Plattform kann für jede Marke eingefärbt werden. Mögliches zusätzliches Geschäftsfeld (Planungsannahme): Lizenz pro Marke und Jahr zusätzlich zum Pay-per-Drive der Partner.
@@ -47,7 +47,7 @@ Eine Probefahrt wird nur abgerechnet, wenn **alle drei** Punkte erfüllt sind:
 **Match & Meet** – Mit KI zum passenden Auto, gemeinsam erleben.
 
 ### 2. Projekt-Kurzversion
-KI-Plattform für Autohäuser aller Marken. Junge Käufer (25–40) finden per Quiz und Swipe passende Modelle, erhalten eine persönliche Probefahrt-Mission und buchen direkt beim Händler. Händler zahlen pro qualifizierter Probefahrt, also nur für Kunden, die wirklich erscheinen.
+KI-Plattform für Autohäuser aller Marken. Junge Käufer (25–40) finden per Quiz passende Modelle, erhalten einen persönlichen Probefahrt-Plan und buchen direkt beim Händler. Händler zahlen pro qualifizierter Probefahrt, also nur für Kunden, die wirklich erscheinen.
 
 ### 3. Kundensegment
 - **Zahlende Kunden:** Autohäuser in der Deutschschweiz (Marken- und Mehrmarkenhändler). Start im Raum Baden/Zürich.
@@ -72,8 +72,8 @@ KI-Plattform für Autohäuser aller Marken. Junge Käufer (25–40) finden per Q
 
 ### 6. Lösungsfunktionen
 - Antipp-Quiz mit 6 Alltagsfragen (Kacheln und Budget-Regler)
-- Swipe-Matching auf Basis geprüfter Modelldaten mit Begründung pro Modell
-- KI-generierte Probefahrt-Mission (Checkliste)
+- Vorschläge auf Basis geprüfter Modelldaten mit Begründung pro Modell
+- Persönlicher Probefahrt-Plan (Checkliste)
 - Terminbuchung mit Ticket und QR-Code
 - Händlerportal: Kurzprofil, QR-Check-in, Abrechnungsübersicht
 - Eigene KI (Ollama) auf Schweizer Infrastruktur
@@ -108,7 +108,7 @@ Vor Akquisitionskosten und Gemeinkosten (CHF 1'500/Monat laut Kursvorgabe).
 
 ### 11. Markteintritt
 - **B2B:** einen Pilot-Händler in Baden gewinnen. Pay-per-Drive bedeutet kein Risiko und macht die Zusage leicht. Die Ergebnisse als Case Study nutzen, dann Garagengruppen und Verbände ansprechen.
-- **B2C:** kurze TikTok/Instagram-Videos („Swipe dein nächstes Auto“), QR-Codes im Showroom und auf Plakaten, Händler teilen den Link auf Website und Social Media
+- **B2C:** kurze TikTok/Instagram-Videos („Finde dein nächstes Auto in 2 Minuten“), QR-Codes im Showroom und auf Plakaten, Händler teilen den Link auf Website und Social Media
 
 ### 12. Akquisitionskosten (Planungsannahmen)
 - **B2B:** CHF 200 Werbung + CHF 300 Vertriebsarbeit pro 2 neuen Händlern → **CAC ≈ CHF 250/Händler**
@@ -125,7 +125,7 @@ Vor Akquisitionskosten und Gemeinkosten (CHF 1'500/Monat laut Kursvorgabe).
 | CUPRA City Garage | Events und Probefahrten | eine Marke, nur vor Ort |
 
 ### 14. Wettbewerbsvorteil
-- **Einzige durchgehende Kette:** Beratung → Match → Mission → erschienene Probefahrt
+- **Einzige durchgehende Kette:** Beratung → Match → Probefahrt-Plan → erschienene Probefahrt
 - **Erfolgsbasiert:** Händler zahlen nur für Kunden, die kommen
 - **Vertrauen:** markenneutral, Platzierungen nicht kaufbar, KI lokal in der Schweiz
 - **Lerneffekt:** Mit jeder Fahrt lernen wir, welche Alltagsfragen Kaufentscheidungen auslösen. Diese Daten hat kein Konfigurator.
@@ -169,7 +169,7 @@ Wir möchten, dass Menschen ein Auto mit einem guten Gefühl und einer nachvollz
 ## Pitch-Gerüst (5 Minuten)
 1. **Hook (30 s):** „Wer von euch hat schon mal eine Probefahrt gemacht und danach genauso wenig gewusst wie vorher?“
 2. **Problem (45 s):** Kunden sind überfordert, Händler bekommen kalte Leads und No-Shows.
-3. **Lösung und Live-Demo (2 Min.):** Quiz → Swipe → Mission → Ticket → Händler scannt → CHF 49 erscheinen im Portal
+3. **Lösung und Live-Demo (2 Min.):** Quiz → Vorschläge → Buchung → Ticket → Händler scannt → CHF 49 erscheinen im Portal
 4. **Geschäftsmodell (45 s):** Pay-per-qualified-Drive, Szenario 10 Händler, CLV und CAC
 5. **Warum wir, warum jetzt (30 s):** eigene KI ohne Cloud, E-Auto-Umbruch, Testergebnisse aus Barcelona
 6. **Ask (30 s):** Pilot-Händler, geprüfte Modelldaten, Startbudget

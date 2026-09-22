@@ -320,19 +320,20 @@ def require_admin(request: Request):
 # ---------- advisor (rule-based; LLM seam for later) ----------
 
 QUIZ = [
+    # Ordered by relevance: budget excludes most, then usage, space, charging, parking; questions last.
+    {"key": "budget", "typ": "slider", "frage": "Wie viel darf dein Auto kosten?", "hinweis": "Kaufpreis, ungefähr reicht.",
+     "min": 25000, "max": 70000, "step": 1000, "default": 45000, "presets": [35000, 45000, 55000]},
     {"key": "alltag", "typ": "single", "frage": "Wie sieht dein Alltag mit dem Auto aus?", "optionen": [
         {"id": "stadt", "emoji": "🏙️", "text": "Kurze Stadtwege", "sub": "unter 20 km am Tag", "profil": {"nutzung": "Kurze Stadtwege", "km_pro_tag": 15}},
         {"id": "pendeln", "emoji": "🚆", "text": "Pendeln", "sub": "rund 40 km am Tag", "profil": {"nutzung": "Pendeln", "km_pro_tag": 40}},
         {"id": "autobahn", "emoji": "🛣️", "text": "Viel Autobahn", "sub": "100 km und mehr", "profil": {"nutzung": "Viel Autobahn", "km_pro_tag": 110}},
         {"id": "touren", "emoji": "🏔️", "text": "Wochenend-Touren", "sub": "unter der Woche wenig", "profil": {"nutzung": "Wochenend-Touren", "km_pro_tag": 25}},
     ]},
-    {"key": "budget", "typ": "slider", "frage": "Wie viel darf dein Auto kosten?", "hinweis": "Kaufpreis, ungefähr reicht.",
-     "min": 25000, "max": 70000, "step": 1000, "default": 45000, "presets": [35000, 45000, 55000]},
-    {"key": "parken", "typ": "single", "frage": "Wo parkst du meistens?", "optionen": [
-        {"id": "eng", "emoji": "🅿️", "text": "Enge Tiefgarage", "profil": {"parken": "eng"}},
-        {"id": "strasse", "emoji": "🏘️", "text": "An der Strasse", "profil": {"parken": "strasse"}},
-        {"id": "eigen", "emoji": "🏠", "text": "Eigener Platz", "profil": {"parken": "eigener_platz"}},
-        {"id": "wechselnd", "emoji": "🤷", "text": "Mal so, mal so", "profil": {"parken": "unklar"}},
+    {"key": "platz", "typ": "single", "frage": "Wer oder was fährt mit?", "optionen": [
+        {"id": "allein", "emoji": "🙋", "text": "Meist nur ich", "profil": {"personen": 1, "grosser_kofferraum": False, "gepaeck": "Meist allein"}},
+        {"id": "zweit", "emoji": "👫", "text": "Zu zweit", "profil": {"personen": 2, "grosser_kofferraum": False, "gepaeck": "Zu zweit"}},
+        {"id": "familie", "emoji": "👨‍👩‍👧", "text": "Familie", "sub": "mit Kinderwagen & Co.", "profil": {"personen": 4, "grosser_kofferraum": True, "gepaeck": "Familie mit Kinderwagen"}},
+        {"id": "hobby", "emoji": "🐕", "text": "Hund & Hobby", "sub": "Velo, Ski, Sporttasche", "profil": {"personen": 2, "grosser_kofferraum": True, "gepaeck": "Hund, Velo oder Sportsachen"}},
     ]},
     {"key": "laden", "typ": "single", "frage": "Könntest du ein E-Auto laden?", "optionen": [
         {"id": "zuhause", "emoji": "🔌", "text": "Zuhause", "sub": "Wallbox oder Steckdose", "profil": {"laden": "zuhause"}},
@@ -340,11 +341,11 @@ QUIZ = [
         {"id": "nein", "emoji": "⛽", "text": "Nein", "sub": "lieber tanken", "profil": {"laden": "nein"}},
         {"id": "unklar", "emoji": "🤔", "text": "Weiss nicht", "profil": {"laden": "unklar"}},
     ]},
-    {"key": "platz", "typ": "single", "frage": "Wer oder was fährt mit?", "optionen": [
-        {"id": "allein", "emoji": "🙋", "text": "Meist nur ich", "profil": {"personen": 1, "grosser_kofferraum": False, "gepaeck": "Meist allein"}},
-        {"id": "zweit", "emoji": "👫", "text": "Zu zweit", "profil": {"personen": 2, "grosser_kofferraum": False, "gepaeck": "Zu zweit"}},
-        {"id": "familie", "emoji": "👨‍👩‍👧", "text": "Familie", "sub": "mit Kinderwagen & Co.", "profil": {"personen": 4, "grosser_kofferraum": True, "gepaeck": "Familie mit Kinderwagen"}},
-        {"id": "hobby", "emoji": "🐕", "text": "Hund & Hobby", "sub": "Velo, Ski, Sporttasche", "profil": {"personen": 2, "grosser_kofferraum": True, "gepaeck": "Hund, Velo oder Sportsachen"}},
+    {"key": "parken", "typ": "single", "frage": "Wo parkst du meistens?", "optionen": [
+        {"id": "eng", "emoji": "🅿️", "text": "Enge Tiefgarage", "profil": {"parken": "eng"}},
+        {"id": "strasse", "emoji": "🏘️", "text": "An der Strasse", "profil": {"parken": "strasse"}},
+        {"id": "eigen", "emoji": "🏠", "text": "Eigener Platz", "profil": {"parken": "eigener_platz"}},
+        {"id": "wechselnd", "emoji": "🤷", "text": "Mal so, mal so", "profil": {"parken": "unklar"}},
     ]},
     {"key": "fragen", "typ": "multi", "max": 3, "frage": "Was willst du bei der Probefahrt klären?",
      "hinweis": "Bis zu 3 antippen. Daraus entsteht deine Probefahrt-Mission.", "optionen": [
