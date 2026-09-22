@@ -584,7 +584,16 @@ function renderStep() {
       <span class="emo">${esc(o.emoji)}</span><b>${esc(o.text)}</b>${o.sub ? `<small>${esc(o.sub)}</small>` : ''}</button>`;
   }).join('')}</div>`;
   body.querySelectorAll('.tile').forEach(tile => tile.onclick = () => pick(step, tile));
-  $('#quiz-next').hidden = step.typ !== 'multi';
+  updateNextButton(step);
+}
+
+// Multi-choice questions: the button only appears once something is chosen and shows the count.
+function updateNextButton(step) {
+  const btn = $('#quiz-next');
+  if (step.typ !== 'multi') { btn.hidden = true; return; }
+  const n = (state.selection[step.key] || []).length;
+  btn.hidden = n === 0;
+  btn.textContent = `${state.step === state.quiz.length - 1 ? 'Vorschläge zeigen' : 'Weiter'} (${n})`;
 }
 
 function pick(step, tile) {
@@ -597,6 +606,7 @@ function pick(step, tile) {
     tile.classList.toggle('on');
     tile.setAttribute('aria-pressed', tile.classList.contains('on'));
     if (tile.classList.contains('on')) flyEmoji(tile, emoji);
+    updateNextButton(step);
     return;
   }
   if (state.advancing) return;
@@ -631,11 +641,12 @@ function prevStep() {
 }
 
 function teamFor(s) {
-  if (s.platz === 'familie') return TEAMS.familie;
-  if (s.platz === 'hobby' || s.alltag === 'touren') return TEAMS.abenteuer;
-  if (s.alltag === 'autobahn') return TEAMS.langstrecke;
-  if (s.alltag === 'stadt') return TEAMS.stadt;
-  if (s.laden === 'zuhause' || s.laden === 'arbeit') return TEAMS.stromer;
+  const has = (key, id) => [].concat(s[key] || []).includes(id); // answers can be single ids or lists
+  if (has('platz', 'familie')) return TEAMS.familie;
+  if (has('platz', 'hobby') || has('alltag', 'touren')) return TEAMS.abenteuer;
+  if (has('alltag', 'autobahn')) return TEAMS.langstrecke;
+  if (has('alltag', 'stadt') && !has('alltag', 'pendeln')) return TEAMS.stadt;
+  if (has('laden', 'zuhause') || has('laden', 'arbeit')) return TEAMS.stromer;
   return TEAMS.pendler;
 }
 

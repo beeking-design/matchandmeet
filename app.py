@@ -326,19 +326,19 @@ QUIZ = [
     # Ordered by relevance: budget excludes most, then usage, space, charging, parking; questions last.
     {"key": "budget", "typ": "slider", "frage": "Wie viel darf dein Auto kosten?", "hinweis": "Kaufpreis, ungefähr reicht.",
      "min": 25000, "max": 70000, "step": 1000, "default": 45000, "presets": [35000, 45000, 55000]},
-    {"key": "alltag", "typ": "single", "frage": "Wie sieht dein Alltag mit dem Auto aus?", "optionen": [
+    {"key": "alltag", "typ": "multi", "max": 2, "frage": "Wie sieht dein Alltag mit dem Auto aus?", "hinweis": "Bis zu 2 antippen.", "optionen": [
         {"id": "stadt", "emoji": "🏙️", "text": "Kurze Stadtwege", "sub": "unter 20 km am Tag", "profil": {"nutzung": "Kurze Stadtwege", "km_pro_tag": 15}},
         {"id": "pendeln", "emoji": "🚆", "text": "Pendeln", "sub": "rund 40 km am Tag", "profil": {"nutzung": "Pendeln", "km_pro_tag": 40}},
         {"id": "autobahn", "emoji": "🛣️", "text": "Viel Autobahn", "sub": "100 km und mehr", "profil": {"nutzung": "Viel Autobahn", "km_pro_tag": 110}},
         {"id": "touren", "emoji": "🏔️", "text": "Wochenend-Touren", "sub": "unter der Woche wenig", "profil": {"nutzung": "Wochenend-Touren", "km_pro_tag": 25}},
     ]},
-    {"key": "platz", "typ": "single", "frage": "Wer oder was fährt mit?", "optionen": [
+    {"key": "platz", "typ": "multi", "max": 2, "frage": "Wer oder was fährt mit?", "hinweis": "Bis zu 2 antippen.", "optionen": [
         {"id": "allein", "emoji": "🙋", "text": "Meist nur ich", "profil": {"personen": 1, "grosser_kofferraum": False, "gepaeck": "Meist allein"}},
         {"id": "zweit", "emoji": "👫", "text": "Zu zweit", "profil": {"personen": 2, "grosser_kofferraum": False, "gepaeck": "Zu zweit"}},
         {"id": "familie", "emoji": "👨‍👩‍👧", "text": "Familie", "sub": "mit Kinderwagen & Co.", "profil": {"personen": 4, "grosser_kofferraum": True, "gepaeck": "Familie mit Kinderwagen"}},
         {"id": "hobby", "emoji": "🐕", "text": "Hund & Hobby", "sub": "Velo, Ski, Sporttasche", "profil": {"personen": 2, "grosser_kofferraum": True, "gepaeck": "Hund, Velo oder Sportsachen"}},
     ]},
-    {"key": "laden", "typ": "single", "frage": "Könntest du ein E-Auto laden?", "optionen": [
+    {"key": "laden", "typ": "multi", "max": 2, "frage": "Könntest du ein E-Auto laden?", "hinweis": "Bis zu 2 antippen.", "optionen": [
         {"id": "zuhause", "emoji": "🔌", "text": "Zuhause", "sub": "Wallbox oder Steckdose", "profil": {"laden": "zuhause"}},
         {"id": "arbeit", "emoji": "🏢", "text": "Bei der Arbeit", "profil": {"laden": "arbeit"}},
         {"id": "nein", "emoji": "⛽", "text": "Nein", "sub": "lieber tanken", "profil": {"laden": "nein"}},
@@ -350,8 +350,8 @@ QUIZ = [
         {"id": "eigen", "emoji": "🏠", "text": "Eigener Platz", "profil": {"parken": "eigener_platz"}},
         {"id": "wechselnd", "emoji": "🤷", "text": "Mal so, mal so", "profil": {"parken": "unklar"}},
     ]},
-    {"key": "fragen", "typ": "single", "frage": "Was willst du bei der Probefahrt vor allem klären?",
-     "hinweis": "Daraus entsteht dein Probefahrt-Plan.", "optionen": [
+    {"key": "fragen", "typ": "multi", "max": 3, "frage": "Was willst du bei der Probefahrt klären?",
+     "hinweis": "Bis zu 3 antippen. Daraus entsteht dein Probefahrt-Plan.", "optionen": [
         {"id": "winter", "emoji": "❄️", "text": "Reichweite im Winter", "profil": {"offene_fragen": ["Reicht die Reichweite im Winter?"]}},
         {"id": "kosten", "emoji": "💸", "text": "Kosten pro Monat", "profil": {"offene_fragen": ["Was kostet mich das Auto im Monat?"]}},
         {"id": "garage", "emoji": "📏", "text": "Passt es in meine Garage?", "profil": {"offene_fragen": ["Passt es in meine Garage?"]}},
@@ -372,14 +372,36 @@ def build_profile(selection):
             # The top end of the slider means "budget open".
             if isinstance(value, (int, float)) and not isinstance(value, bool) and value < step["max"]:
                 profile["budget_max_chf"] = int(max(value, step["min"]))
-        elif step["typ"] == "single":
-            option = next((o for o in step["optionen"] if o["id"] == value), None)
-            if option:
-                profile.update(option["profil"])
         else:
-            chosen = value if isinstance(value, list) else []
-            profile["offene_fragen"] = [o["frage"] for o in step["optionen"] if o["id"] in chosen][:step["max"]]
+            chosen = value if isinstance(value, list) else [value]
+            options = [o for o in step["optionen"] if o["id"] in chosen][:step.get("max", 1)]
+            if options:
+                profile.update(merge_option_profiles([o["profil"] for o in options]))
+    profile["offene_fragen"] = profile["offene_fragen"][:3]
     return profile
+
+
+LADEN_RANK = {"zuhause": 3, "arbeit": 2, "nein": 1, "unklar": 0}
+
+
+def merge_option_profiles(parts):
+    """Combine several tapped answers of one question: the more demanding / better value wins."""
+    merged = {}
+    for part in parts:
+        for key, value in part.items():
+            if key not in merged:
+                merged[key] = value
+            elif key in ("km_pro_tag", "personen"):
+                merged[key] = max(merged[key], value)
+            elif key == "grosser_kofferraum":
+                merged[key] = merged[key] or value
+            elif key == "laden":
+                merged[key] = max(merged[key], value, key=lambda v: LADEN_RANK.get(v, 0))
+            elif key == "offene_fragen":
+                merged[key] = merged[key] + value
+            else:  # nutzung, gepaeck: keep both descriptions for the partner brief
+                merged[key] = f"{merged[key]}, {value}"
+    return merged
 
 
 def score_car(car, p, ignore_budget=False):
