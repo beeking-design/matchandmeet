@@ -7,7 +7,7 @@
 <title>Match & Meet – Entwicklerkonsole</title>
 <style>
   :root { --bg: #f4f5f8; --surface: #fff; --line: #e3e6ec; --text: #12151c; --muted: #667085;
-    --accent: #c6ff3d; --ink: #0b0d12; --ok: #0f8a45; --ok-bg: #e3f7ea; --err: #c0263a; }
+    --accent: #c8875a; --ink: #0b0d12; --ok: #0f8a45; --ok-bg: #e3f7ea; --err: #c0263a; }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   [hidden] { display: none !important; }
@@ -16,7 +16,10 @@
   header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
     background: var(--ink); color: #fff; padding: 16px 20px; border-radius: 18px; }
   .logo { font-weight: 800; font-size: 20px; }
-  .logo span { color: var(--accent); }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo svg { width: 32px; height: 22px; color: #c8875a; flex: none; }
+  .logo b { font-weight: 900; letter-spacing: .02em; display: inline-block; transform: skewX(-9deg); }
+  .logo b i { font-style: normal; color: #c8875a; margin: 0 1px; }
   .logo small { font-weight: 500; color: #98a2b6; margin-left: 8px; font-size: 14px; }
   .head-right { display: flex; gap: 14px; align-items: center; color: #98a2b6; font-size: 13px; }
   .link { background: none; border: 0; color: #98a2b6; cursor: pointer; }
@@ -61,7 +64,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="logo">match<span>&amp;</span>meet <small>Entwicklerkonsole</small></div>
+    <div class="logo"><svg viewBox="0 0 40 28" aria-hidden="true"><path d="M0 28 L10 0 L20 18 L30 0 L40 28 L32 28 L28 14 L20 28 L12 14 L8 28 Z" fill="currentColor"/></svg><b>MATCH<i>/</i>MEET</b> <small>Entwicklerkonsole</small></div>
     <div class="head-right" id="head-right" hidden><span id="db-info"></span><button class="link" id="logout">Abmelden</button></div>
   </header>
 

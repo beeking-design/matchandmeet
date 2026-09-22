@@ -22,6 +22,7 @@ Uses a local SQLite file (`matchmeet.db`). Admin password locally: `admin`. Dele
 4. Vercel project → **Settings → Environment Variables**:
    - `ADMIN_PASSWORD` – your developer password
    - `SECRET_KEY` – random string, e.g. `python -c "import secrets; print(secrets.token_hex(32))"`
+   - `WHITELABEL_MARKE` – optional, default `CUPRA` (customer app shows only this brand); set to an empty value for all brands
 5. Redeploy. Tables and sample data are created on the first request.
 6. Open `/admin` → **Garagen** → create access codes for the garages.
 

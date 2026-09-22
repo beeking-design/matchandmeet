@@ -30,4 +30,7 @@ Customer http://localhost:8000 · Garage http://localhost:8000/haendler · Devel
 - No CDN; the only external assets are car photos hotlinked from Wikimedia Commons (`bild_url`) with a mandatory credit (`bild_quelle`, `bild_link`). The SVG silhouette is the fallback.
 - Seed data syncs on start: new ids from `cars.json`/`dealers.json` are inserted, photos are added to cars without one; admin edits are never overwritten.
 - Fee per qualified test drive: `FEE_CHF` in `app.py`
+- White-label: `WHITELABEL_MARKE` (default `CUPRA`, empty = all brands) limits the customer app (`customer_cars`) to one brand; `find_matches` then diversifies by `familie`. Theme, logo lockup ("MATCH/MEET for CUPRA") and texts in `static/index.html` are CUPRA-styled. Garage portal and admin stay multi-brand.
+- CUPRA studio images in `static/assets/cupra/` (served at `/assets`) are © CUPRA, used for the study project with a visible disclaimer on the start page. Consumption/CO₂ fields (`leistung`, `verbrauch`, `co2`, `co2_klasse`) come from the maker's WLTP data and are shown on every card.
+- Seed cars with a higher `rev` than the stored car replace it completely (use to push data updates; overrides admin edits).
 - Customers enter their PLZ at booking; dealers are sorted by crow-flies distance (`RADIUS_KM` = 20). Sample garages in `dealers.json` are placed so every brand is within 20 km of every town in `plz.json` (three brand groups per location).

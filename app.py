@@ -28,6 +28,7 @@ from pathlib import Path
 import segno
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 BASE = Path(__file__).parent
@@ -38,6 +39,8 @@ ON_VERCEL = bool(os.environ.get("VERCEL"))
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "" if ON_VERCEL else "admin")
 SECRET_KEY = os.environ.get("SECRET_KEY", "" if ON_VERCEL else "local-dev-secret")
 FEE_CHF = 49
+# White-label: the customer app only shows this brand. Empty = brand-neutral (all brands).
+MARKE = os.environ.get("WHITELABEL_MARKE", "CUPRA").strip()
 SESSION_HOURS = 12
 DEALER_COOKIE, ADMIN_COOKIE = "mm_haendler", "mm_admin"
 WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
@@ -116,6 +119,9 @@ def ensure_schema():
                 continue
             if c["id"] not in existing:
                 q(conn, "INSERT INTO cars (id, data) VALUES (?, ?)", (c["id"], json.dumps(c, ensure_ascii=False)))
+            elif c.get("rev", 0) > existing[c["id"]].get("rev", 0):
+                # A newer seed revision replaces the stored car: deliberate data updates win over admin edits.
+                q(conn, "UPDATE cars SET data = ? WHERE id = ?", (json.dumps(c, ensure_ascii=False), c["id"]))
             elif c.get("bild_url") and not existing[c["id"]].get("bild_url"):
                 photo = {k: c[k] for k in PHOTO_FIELDS if k in c}
                 q(conn, "UPDATE cars SET data = ? WHERE id = ?",
@@ -127,6 +133,12 @@ def load_cars(conn, only_active=True):
     rows = q(conn, "SELECT id, data, aktiv FROM cars").fetchall()
     return {r["id"]: {**json.loads(r["data"]), "id": r["id"], "aktiv": bool(r["aktiv"])}
             for r in rows if r["aktiv"] or not only_active}
+
+
+def customer_cars(conn):
+    """Cars the customer app may show: only the white-label brand if one is configured."""
+    cars = load_cars(conn)
+    return {k: c for k, c in cars.items() if c["marke"] == MARKE} if MARKE else cars
 
 
 def load_dealers(conn, only_active=True):
@@ -315,7 +327,7 @@ QUIZ = [
         {"id": "touren", "emoji": "🏔️", "text": "Wochenend-Touren", "sub": "unter der Woche wenig", "profil": {"nutzung": "Wochenend-Touren", "km_pro_tag": 25}},
     ]},
     {"key": "budget", "typ": "slider", "frage": "Wie viel darf dein Auto kosten?", "hinweis": "Kaufpreis, ungefähr reicht.",
-     "min": 15000, "max": 90000, "step": 1000, "default": 40000},
+     "min": 25000, "max": 70000, "step": 1000, "default": 45000, "presets": [35000, 45000, 55000]},
     {"key": "parken", "typ": "single", "frage": "Wo parkst du meistens?", "optionen": [
         {"id": "eng", "emoji": "🅿️", "text": "Enge Tiefgarage", "profil": {"parken": "eng"}},
         {"id": "strasse", "emoji": "🏘️", "text": "An der Strasse", "profil": {"parken": "strasse"}},
@@ -472,11 +484,14 @@ def find_matches(profile, cars, dealers, limit=8):
         scored = [(car, *score_car(car, profile, ignore_budget=True)) for car in cars.values()]
     scored.sort(key=lambda s: -s[1])
 
-    picked, per_brand = [], {}
+    # Variety: at most 2 cars per brand, or per model family when only one brand is shown (white-label).
+    single_brand = len({c["marke"] for c in cars.values()}) == 1
+    group = (lambda c: c.get("familie") or c["modell"]) if single_brand else (lambda c: c["marke"])
+    picked, per_group = [], {}
     for car, score, reasons in scored:
-        if per_brand.get(car["marke"], 0) >= 2:
+        if per_group.get(group(car), 0) >= 2:
             continue
-        per_brand[car["marke"]] = per_brand.get(car["marke"], 0) + 1
+        per_group[group(car)] = per_group.get(group(car), 0) + 1
         picked.append((car, score, reasons))
         if len(picked) == limit:
             break
@@ -553,6 +568,7 @@ CAR_FIELDS = {"marke": str, "modell": str, "segment": str, "antrieb": str, "prei
               "dc_kw": int, "highlight": str}
 ANTRIEBE = {"Elektro", "Plug-in-Hybrid", "Hybrid", "Mild-Hybrid", "Benzin", "Diesel"}
 PHOTO_FIELDS = ("bild_url", "bild_quelle", "bild_link")  # optional; photos need a credit line (CC licenses)
+TEXT_FIELDS = ("familie", "leistung", "verbrauch", "co2", "co2_klasse")  # optional; energy data as published by the maker
 
 
 def validate_car(car_id, data):
@@ -572,15 +588,24 @@ def validate_car(car_id, data):
         value = data.get(key)
         if value in (None, ""):
             continue
-        if not isinstance(value, str) or (key != "bild_quelle" and not value.startswith("https://")):
-            raise HTTPException(400, f"{key}: muss eine https-Adresse sein" if key != "bild_quelle" else "bild_quelle: Text erwartet")
+        if not isinstance(value, str) or (key != "bild_quelle" and not value.startswith(("https://", "/assets/"))):
+            raise HTTPException(400, f"{key}: muss mit https:// oder /assets/ beginnen" if key != "bild_quelle" else "bild_quelle: Text erwartet")
         photo[key] = value[:300]
-    return {"id": car_id, **{k: data[k] for k in CAR_FIELDS}, "farbe": farbe, **photo}
+    extra = {}
+    for key in TEXT_FIELDS:
+        if isinstance(data.get(key), str) and data[key].strip():
+            extra[key] = data[key].strip()[:160]
+    if isinstance(data.get("editionen"), list):
+        extra["editionen"] = [str(e).strip()[:40] for e in data["editionen"] if str(e).strip()][:5]
+    if isinstance(data.get("rev"), int) and not isinstance(data.get("rev"), bool):
+        extra["rev"] = data["rev"]
+    return {"id": car_id, **{k: data[k] for k in CAR_FIELDS}, "farbe": farbe, **photo, **extra}
 
 
 # ---------- app ----------
 
 app = FastAPI(title="Match & Meet")
+app.mount("/assets", StaticFiles(directory=BASE / "static" / "assets"), name="assets")
 
 
 @app.middleware("http")
@@ -675,13 +700,13 @@ def profile(req: ProfileRequest):
 @app.post("/api/matches")
 def matches(req: MatchRequest):
     with db() as conn:
-        return {"cars": find_matches(req.profile, load_cars(conn), load_dealers(conn))}
+        return {"cars": find_matches(req.profile, customer_cars(conn), load_dealers(conn))}
 
 
 @app.post("/api/mission")
 def mission(req: MissionRequest):
     with db() as conn:
-        car = load_cars(conn).get(req.car_id)
+        car = customer_cars(conn).get(req.car_id)
     if not car:
         raise HTTPException(404, "Modell nicht gefunden")
     return {"items": rule_mission(req.profile, car), "tipp": rule_tip(req.profile, car)}
@@ -720,7 +745,7 @@ def dealers(brand: str = "", plz: str = "", limit: int = 5):
 def create_booking(req: BookingRequest):
     vorname = req.vorname.strip()[:40]
     with db() as conn:
-        car, dealer = load_cars(conn).get(req.car_id), load_dealers(conn).get(req.dealer_id)
+        car, dealer = customer_cars(conn).get(req.car_id), load_dealers(conn).get(req.dealer_id)
         if not car or not dealer or car["marke"] not in dealer["marken"]:
             raise HTTPException(400, "Dieser Händler führt das Modell nicht")
         if not vorname:

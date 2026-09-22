@@ -28,6 +28,7 @@ Junge Autokäufer finden per **Antipp-Quiz und Swipe** in zwei Minuten passende 
 - **Was der MVP beweisen soll:** Buchen junge Kunden über Swipe und Mission? Erscheinen sie? Zahlen Garagen dafür? Die KI ist nicht die riskante Annahme.
 - **Drei Bereiche:** Kunden-App, Garagenportal (Login mit Zugangscode, Check-in, Abrechnung), Entwicklerkonsole (Funnel, Abrechnung pro Monat, Garagen und Fahrzeugdaten verwalten)
 - **Garage in der Nähe:** Der Kunde gibt bei der Buchung seine PLZ ein und sieht die nächsten Garagen mit Distanz. In der Pilotregion (Kanton Zürich und Aargau Ost) ist jede Marke im Umkreis von 20 km erreichbar (fiktive Beispiel-Garagen).
+- **White-Label für Hersteller:** Die Kunden-App läuft als „MATCH/MEET for CUPRA“: nur CUPRA-Modelle (17 Varianten mit Verbrauchs- und CO₂-Angaben), CUPRA-Farben, nur CUPRA-Partner. Dieselbe Plattform kann für jede Marke eingefärbt werden. Mögliches zusätzliches Geschäftsfeld (Planungsannahme): Lizenz pro Marke und Jahr zusätzlich zum Pay-per-Drive der Partner.
 - **Technik:** GitHub → Vercel, Datenbank Neon (Postgres)
 
 ## Qualifizierte Probefahrt (Abrechnungsauslöser)

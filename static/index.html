@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f6f3ee">
-<title>Match & Meet – Vom Swipe zur Probefahrt</title>
+<meta name="theme-color" content="#f4f1ec">
+<title>Match/Meet for CUPRA – Dein nächster CUPRA</title>
 <script>
   // Apply the saved or system theme before the first paint to avoid a flash.
   try {
@@ -15,254 +15,257 @@
   }
 </script>
 <style>
+  /* White-label theme: CUPRA-style copper on warm white / near black. */
   :root {
     color-scheme: light;
-    --bg: #f6f3ee; --glow-1: rgba(198,255,61,.45); --glow-2: rgba(255,138,92,.22);
-    --surface: #ffffff; --surface2: #f1ede6; --line: #e5dfd5;
-    --text: #17191f; --muted: #6a6f7c; --accent: #c6ff3d; --on-accent: #17191f; --accent-text: #4a7a0c;
-    --warm: #ff8a5c; --like: #16a34a; --nope: #e5484d;
-    --shadow: 0 10px 30px rgba(60,45,20,.10); --shadow-lg: 0 24px 50px rgba(60,45,20,.18);
+    --bg: #f4f1ec; --glow: rgba(176,112,63,.14);
+    --surface: #ffffff; --surface2: #ece7df; --line: #ddd5c9;
+    --text: #151515; --muted: #6b6660; --accent: #b0703f; --on-accent: #ffffff; --accent-text: #8a4f2a;
+    --like: #2f855a; --nope: #c53030;
+    --shadow: 0 10px 30px rgba(40,28,15,.08); --shadow-lg: 0 24px 50px rgba(40,28,15,.16);
+    --studio: radial-gradient(ellipse at 50% 72%, #ffffff 0%, #ece8e2 72%);
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --bg: #0e1016; --glow-1: rgba(198,255,61,.10); --glow-2: rgba(255,138,92,.10);
-    --surface: #171a22; --surface2: #20242f; --line: #2c3242;
-    --text: #f4f5f8; --muted: #9aa3b5; --accent: #c6ff3d; --on-accent: #0b0d12; --accent-text: #c6ff3d;
-    --warm: #ff9f6b; --like: #3dffa2; --nope: #ff5b6e;
-    --shadow: 0 12px 30px rgba(0,0,0,.35); --shadow-lg: 0 24px 50px rgba(0,0,0,.5);
+    --bg: #0c0d0f; --glow: rgba(200,135,90,.12);
+    --surface: #16181b; --surface2: #1f2226; --line: #2c2f34;
+    --text: #f2efe9; --muted: #9c968d; --accent: #c8875a; --on-accent: #0c0d0f; --accent-text: #d9a077;
+    --like: #6fd3a0; --nope: #ff6b6b;
+    --shadow: 0 12px 30px rgba(0,0,0,.4); --shadow-lg: 0 24px 50px rgba(0,0,0,.55);
+    --studio: radial-gradient(ellipse at 50% 72%, #f6f4f0 0%, #d9d4cc 75%);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html, body { margin: 0; color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   body { min-height: 100vh; display: flex; justify-content: center;
-    background: radial-gradient(800px 480px at 0% -10%, var(--glow-1), transparent 60%),
-                radial-gradient(700px 420px at 110% 0%, var(--glow-2), transparent 60%), var(--bg);
-    background-attachment: fixed; transition: background-color .3s; }
+    background: radial-gradient(900px 520px at 50% -12%, var(--glow), transparent 65%), var(--bg); background-attachment: fixed; }
   [hidden] { display: none !important; }
   button { font: inherit; color: inherit; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
   .app { width: 100%; max-width: 460px; min-height: 100vh; padding: 0 18px 28px; display: flex; flex-direction: column; }
 
-  /* global app bar: home is always one tap away */
+  /* app bar with logo: home is always one tap away */
   .appbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    margin: 0 -18px 8px; padding: 12px 18px; background: color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-  .home { background: none; border: 0; padding: 4px 0; cursor: pointer; }
-  .logo { font-weight: 800; letter-spacing: -.03em; font-size: 21px; }
-  .logo span { color: var(--warm); }
+    margin: 0 -18px 8px; padding: 12px 18px; background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+  .home { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 2px 0; cursor: pointer; text-align: left; }
+  .mark { width: 34px; height: 24px; color: var(--accent); flex: none; }
+  .lockup { display: grid; line-height: 1; gap: 4px; }
+  .wordmark { font-weight: 900; font-size: 19px; letter-spacing: .02em; display: inline-block; transform: skewX(-9deg); }
+  .wordmark i { font-style: normal; color: var(--accent); margin: 0 1px; }
+  .for { font-size: 9.5px; font-weight: 600; letter-spacing: .32em; color: var(--muted); }
   .appbar-right { display: flex; gap: 8px; }
-  .icon-btn { width: 42px; height: 42px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
-    cursor: pointer; font-size: 18px; display: grid; place-items: center; box-shadow: var(--shadow); transition: transform .15s; }
+  .icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface);
+    cursor: pointer; font-size: 17px; display: grid; place-items: center; transition: transform .15s; }
   .icon-btn:active { transform: scale(.92); }
 
-  .view { display: flex; flex-direction: column; flex: 1; gap: 16px; animation: fade .35s ease; }
+  .view { display: flex; flex-direction: column; flex: 1; gap: 16px; animation: fade .4s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
   .subbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
-  .btn { appearance: none; border: 0; border-radius: 999px; padding: 16px 22px; font-weight: 750; cursor: pointer; width: 100%;
-    background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 24px rgba(140,190,20,.35); transition: transform .15s, box-shadow .15s; }
-  .btn:hover { box-shadow: 0 14px 30px rgba(140,190,20,.45); }
+  .btn { appearance: none; border: 0; border-radius: 999px; padding: 16px 22px; font-weight: 700; letter-spacing: .04em; cursor: pointer; width: 100%;
+    background: var(--accent); color: var(--on-accent); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 35%, transparent); transition: transform .15s, filter .15s; }
+  .btn:hover { filter: brightness(1.06); }
   .btn:active { transform: scale(.97); }
   .btn:disabled { opacity: .5; cursor: default; }
-  .btn.big { padding: 18px 22px; font-size: 18px; }
-  .btn.ghost { background: var(--surface); color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+  .btn.big { padding: 18px 22px; font-size: 16px; text-transform: uppercase; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); box-shadow: none; text-transform: none; }
   .link { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 8px 4px; font-weight: 600; }
   .link:hover { color: var(--text); }
   .badge { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
     background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
   .muted { color: var(--muted); }
-  .title { font-size: 28px; letter-spacing: -.03em; line-height: 1.1; margin: 0; }
+  .eyebrow { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+  .title { font-size: 28px; letter-spacing: -.02em; line-height: 1.1; margin: 0; }
   .spacer { flex: 1; }
   .fineprint { color: var(--muted); font-size: 12px; text-align: center; margin: 0; }
 
-  /* start */
-  .hero { position: relative; padding-top: 18px; }
-  .pill { display: inline-block; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line);
-    font-size: 13px; font-weight: 600; color: var(--muted); }
-  .hero h1 { font-size: clamp(40px, 12vw, 52px); line-height: 1; letter-spacing: -.045em; margin: 18px 0 14px; max-width: 11ch; }
-  .hero h1 em { font-style: normal; background: linear-gradient(100deg, var(--accent-text), var(--warm)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p { color: var(--muted); margin: 0; font-size: 17px; max-width: 30ch; }
-  .floaters { position: absolute; right: 0; top: 34px; width: 120px; height: 190px; pointer-events: none; }
-  .floaters span { position: absolute; display: grid; place-items: center; width: 58px; height: 58px; border-radius: 18px;
-    background: var(--surface); box-shadow: var(--shadow); font-size: 28px; animation: float 4s ease-in-out infinite; }
-  .floaters span:nth-child(1) { right: 6px; top: 0; transform: rotate(8deg); }
-  .floaters span:nth-child(2) { right: 62px; top: 62px; animation-delay: -1.2s; }
-  .floaters span:nth-child(3) { right: 0; top: 120px; animation-delay: -2.4s; }
-  @keyframes float { 50% { translate: 0 -10px; } }
-  /* Narrow phones: the floating tiles become a small row above the headline instead of covering it. */
-  @media (max-width: 440px) {
-    .floaters { position: static; display: flex; gap: 10px; width: auto; height: auto; margin-bottom: 14px; }
-    .floaters span { position: static; width: 46px; height: 46px; font-size: 22px; border-radius: 14px; }
-  }
+  /* start (premium landing) */
+  .hero { padding-top: 14px; display: grid; gap: 14px; }
+  .hero h1 { margin: 0; text-transform: uppercase; font-size: clamp(31px, 9.2vw, 42px); line-height: 1.02; letter-spacing: -.01em; }
+  .hero h1 span { display: block; font-weight: 300; }
+  .hero h1 strong { display: block; font-weight: 900; color: var(--accent-text); }
+  .rule { width: 56px; height: 2px; background: var(--accent); }
+  .lead { margin: 0; color: var(--muted); font-size: 16px; max-width: 34ch; }
+  .hero-visual { margin: 4px 0 0; border-radius: 26px; overflow: hidden; background: var(--studio); box-shadow: var(--shadow-lg); aspect-ratio: 16 / 9; }
+  .hero-visual img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; animation: drive-in 1.4s cubic-bezier(.2,.8,.2,1); }
+  @keyframes drive-in { from { transform: translateX(-18%) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
   .resume { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 14px 16px; cursor: pointer;
-    border-radius: 18px; border: 1px dashed var(--warm); background: color-mix(in srgb, var(--warm) 10%, var(--surface)); font-weight: 650; text-align: left; }
-  .steps { display: grid; gap: 10px; }
-  .step { display: flex; gap: 14px; align-items: center; padding: 14px 16px; background: var(--surface);
-    border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
-  .step .ico { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; flex: none; }
-  .step:nth-child(1) .ico { background: color-mix(in srgb, var(--accent) 35%, var(--surface)); }
-  .step:nth-child(2) .ico { background: color-mix(in srgb, var(--warm) 25%, var(--surface)); }
-  .step:nth-child(3) .ico { background: color-mix(in srgb, #7c5cff 20%, var(--surface)); }
-  .step b { display: block; }
-  .step small { color: var(--muted); }
+    border-radius: 16px; border: 1px solid var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); font-weight: 650; text-align: left; }
+  .steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .steps li { display: flex; gap: 16px; align-items: baseline; padding: 13px 2px; border-bottom: 1px solid var(--line); }
+  .steps li > span { font-weight: 300; font-size: 22px; color: var(--accent-text); width: 30px; flex: none; }
+  .steps b { display: block; font-weight: 700; }
+  .steps small { color: var(--muted); }
+  .models { display: grid; gap: 10px; }
+  .model-strip { display: flex; gap: 10px; overflow-x: auto; margin: 0 -18px; padding: 2px 18px 8px; scroll-snap-type: x mandatory; scroll-padding-inline: 18px; scrollbar-width: none; }
+  .model-strip figure { flex: none; width: 150px; margin: 0; scroll-snap-align: start; }
+  .model-strip .pic { height: 86px; border-radius: 16px; overflow: hidden; background: var(--studio); }
+  .model-strip img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+  .model-strip figcaption { margin-top: 6px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  .disclaimer { margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--muted); text-align: center; }
 
   /* quiz */
   .subbar .link, .subbar .badge { white-space: nowrap; flex: none; }
   .dots { display: flex; gap: 5px; flex: 1; justify-content: center; min-width: 0; }
-  .dots i { width: 18px; height: 7px; border-radius: 99px; background: var(--line); transition: background .3s, width .3s; }
+  .dots i { width: 18px; height: 4px; border-radius: 99px; background: var(--line); transition: background .3s, width .3s; }
   .dots i.on { background: var(--accent); }
-  .dots i.now { width: 32px; background: linear-gradient(90deg, var(--accent), var(--warm)); }
-  .quiz-q { font-size: clamp(28px, 8vw, 34px); margin-top: 4px; }
+  .dots i.now { width: 32px; background: var(--accent-text); }
+  .quiz-q { font-size: clamp(27px, 8vw, 33px); margin-top: 4px; }
   .quiz-hint { margin: -6px 0 0; }
   .enter { animation: slide .3s ease; }
   @keyframes slide { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
   .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 138px;
-    padding: 16px; border-radius: 24px; border: 2px solid transparent; background: var(--surface); box-shadow: var(--shadow);
+  .tile { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 136px;
+    padding: 16px; border-radius: 20px; border: 1.5px solid var(--line); background: var(--surface);
     text-align: left; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
-  .tile:hover { transform: translateY(-2px); }
+  .tile:hover { border-color: var(--accent); }
   .tile:active { transform: scale(.96); }
-  .tile .emo { font-size: 38px; line-height: 1; margin-bottom: auto; display: inline-block; }
+  .tile .emo { font-size: 36px; line-height: 1; margin-bottom: auto; display: inline-block; }
   .tile b { font-size: 16px; line-height: 1.2; margin-top: 12px; }
   .tile small { color: var(--muted); font-size: 13px; }
-  .tile.on { border-color: var(--accent); background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 28%, var(--surface)), var(--surface) 70%); }
+  .tile.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
   .tile.on .emo { animation: pop .4s ease; }
-  .tile.on::after { content: "✓"; position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%;
-    background: var(--accent); color: var(--on-accent); font-weight: 900; font-size: 14px; display: grid; place-items: center; }
-  @keyframes pop { 50% { transform: scale(1.35) rotate(-10deg); } }
-  .slider-box { display: grid; gap: 18px; padding: 28px 20px; background: var(--surface); border-radius: 24px; box-shadow: var(--shadow); text-align: center; }
-  .slider-emoji { font-size: 44px; line-height: 1; transition: transform .2s; }
-  .slider-value { font-size: clamp(34px, 10vw, 44px); font-weight: 800; letter-spacing: -.03em; color: var(--accent-text); }
-  .slider-box input { width: 100%; accent-color: var(--warm); height: 32px; cursor: pointer; }
+  .tile.on::after { content: "✓"; position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: var(--on-accent); font-weight: 900; font-size: 13px; display: grid; place-items: center; }
+  @keyframes pop { 50% { transform: scale(1.3) rotate(-8deg); } }
+  .slider-box { display: grid; gap: 18px; padding: 28px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; text-align: center; }
+  .slider-emoji { font-size: 42px; line-height: 1; transition: transform .2s; }
+  .slider-value { font-size: clamp(32px, 10vw, 42px); font-weight: 800; letter-spacing: -.02em; color: var(--accent-text); }
+  .slider-box input { width: 100%; accent-color: var(--accent); height: 32px; cursor: pointer; }
   .slider-scale { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
   .presets { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
   .preset { border: 1px solid var(--line); background: var(--surface2); border-radius: 99px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
-  .preset:hover { border-color: var(--warm); }
+  .preset:hover { border-color: var(--accent); }
 
   /* team reveal */
-  .team { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 28px 20px; margin-top: 12px;
-    background: var(--surface); border-radius: 28px; box-shadow: var(--shadow-lg); }
-  .team-emoji { font-size: 84px; line-height: 1.1; animation: bounce-in .7s cubic-bezier(.3,1.6,.5,1); }
+  .team { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 30px 20px; margin-top: 12px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 26px; box-shadow: var(--shadow-lg); }
+  .team-emoji { font-size: 80px; line-height: 1.1; animation: bounce-in .7s cubic-bezier(.3,1.6,.5,1); }
   @keyframes bounce-in { from { transform: scale(.2) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
-  .team .title { font-size: 34px; background: linear-gradient(100deg, var(--accent-text), var(--warm)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .team .title { font-size: 32px; text-transform: uppercase; letter-spacing: .01em; color: var(--accent-text); }
   .team p { margin: 0; max-width: 32ch; }
 
   /* loading */
   .loader { flex: 1; display: grid; place-items: center; align-content: center; gap: 14px; text-align: center; padding: 40px 10px; }
-  .loader-car { font-size: 56px; animation: drive 1.1s ease-in-out infinite; }
+  .loader-car { font-size: 52px; animation: drive 1.1s ease-in-out infinite; }
   @keyframes drive { 0%, 100% { transform: translateX(-24px); } 50% { transform: translateX(24px) rotate(-4deg); } }
   .loader h2 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
 
   /* swipe */
   .tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: inherit; }
   .tags span { font-size: 12px; padding: 5px 10px; border-radius: 99px; background: var(--surface2); color: var(--muted); font-weight: 600; }
-  .stack { position: relative; height: min(600px, 70vh); min-height: 520px; }
-  .card { position: absolute; inset: 0; border-radius: 30px; padding: 18px; color: #fff;
-    background: linear-gradient(160deg, var(--c1), var(--c2)); box-shadow: var(--shadow-lg);
-    display: flex; flex-direction: column; gap: 8px; overflow: hidden;
+  .stack { position: relative; height: min(640px, 74vh); min-height: 560px; }
+  .card { position: absolute; inset: 0; border-radius: 28px; padding: 16px; color: #fff;
+    background: linear-gradient(165deg, var(--c1) 30%, var(--c2)); box-shadow: var(--shadow-lg);
+    display: flex; flex-direction: column; gap: 7px; overflow: hidden;
     transform: translateY(calc(var(--depth, 0) * 12px)) scale(calc(1 - var(--depth, 0) * .045));
     transition: transform .25s; user-select: none; touch-action: none; }
   .card[data-top] { cursor: grab; }
   .card[data-top]:active { cursor: grabbing; }
   .card-top { display: flex; justify-content: space-between; align-items: center; }
-  .brand { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; opacity: .9; }
-  .pct { background: rgba(0,0,0,.4); padding: 6px 10px; border-radius: 99px; font-size: 13px; font-weight: 800; color: #c6ff3d; }
+  .brand { font-weight: 700; letter-spacing: .2em; text-transform: uppercase; font-size: 12px; opacity: .85; }
+  .pct { background: rgba(0,0,0,.45); padding: 5px 10px; border-radius: 99px; font-size: 13px; font-weight: 800; color: #e2b48f; }
   .car-art svg { width: 100%; height: auto; display: block; }
-  .photo { position: relative; margin: 2px 0 0; height: 180px; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,.25); flex: none; }
-  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-  .photo figcaption { position: absolute; right: 8px; bottom: 6px; max-width: 92%; font-size: 10px; color: rgba(255,255,255,.9);
-    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .photo { position: relative; margin: 0; height: 170px; border-radius: 18px; overflow: hidden; background: var(--studio); flex: none; }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; mix-blend-mode: multiply; }
+  .photo figcaption { position: absolute; right: 8px; bottom: 6px; max-width: 92%; font-size: 10px; color: #fff;
+    background: rgba(0,0,0,.45); padding: 2px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .photo svg { display: none; }
   .photo.broken img, .photo.broken figcaption { display: none; }
   .photo.broken svg { display: block; width: 100%; height: 100%; }
-  .card h3 { margin: 0; font-size: 32px; letter-spacing: -.03em; line-height: 1.05; }
-  .sub { color: rgba(255,255,255,.8); font-size: 14px; }
+  .card h3 { margin: 0; font-size: 26px; letter-spacing: -.01em; line-height: 1.05; text-transform: uppercase; font-weight: 800; }
+  .sub { color: rgba(255,255,255,.8); font-size: 13px; }
   .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .facts div { background: rgba(0,0,0,.28); border-radius: 14px; padding: 8px 10px; }
+  .facts div { background: rgba(0,0,0,.3); border-radius: 12px; padding: 7px 10px; }
   .facts b { display: block; font-size: 15px; }
   .facts span { font-size: 11px; color: rgba(255,255,255,.75); }
-  .why { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .why { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; }
   .why li { display: flex; gap: 8px; }
-  .why li::before { content: "✓"; color: #c6ff3d; font-weight: 800; }
+  .why li::before { content: "✓"; color: #e2b48f; font-weight: 800; }
+  .energy { margin-top: auto; font-size: 10.5px; line-height: 1.4; color: rgba(255,255,255,.72); border-top: 1px solid rgba(255,255,255,.15); padding-top: 7px; }
+  .editions { font-size: 12px; color: #e2b48f; font-weight: 600; }
   .stamp { position: absolute; top: 64px; padding: 4px 14px; border: 3px solid; border-radius: 12px; font-weight: 900;
-    font-size: 28px; letter-spacing: .08em; pointer-events: none; background: rgba(0,0,0,.3); }
-  .stamp.like { left: 20px; color: #3dffa2; transform: rotate(-14deg); opacity: var(--like-o, 0); }
+    font-size: 28px; letter-spacing: .08em; pointer-events: none; background: rgba(0,0,0,.35); z-index: 2; }
+  .stamp.like { left: 20px; color: #6fd3a0; transform: rotate(-14deg); opacity: var(--like-o, 0); }
   .stamp.nope { right: 20px; color: #ff6b7a; transform: rotate(14deg); opacity: var(--nope-o, 0); }
   .swipe-actions { display: flex; justify-content: center; align-items: center; gap: 28px; margin-top: 10px; }
-  .round { width: 66px; height: 66px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
-    font-size: 26px; cursor: pointer; display: grid; place-items: center; transition: transform .15s; }
+  .round { width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
+    font-size: 24px; cursor: pointer; display: grid; place-items: center; transition: transform .15s; }
   .round:active { transform: scale(.88); }
   .round.nope { color: var(--nope); }
-  .round.like { color: #fff; width: 80px; height: 80px; font-size: 34px; border: 0; background: linear-gradient(135deg, #ff6b8b, var(--warm)); box-shadow: 0 12px 26px rgba(255,107,139,.4); }
+  .round.like { color: #fff; width: 78px; height: 78px; font-size: 32px; border: 0; background: linear-gradient(135deg, #c8875a, #8a4f2a);
+    box-shadow: 0 12px 26px rgba(176,112,63,.45); }
   .bump { animation: bump .35s ease; }
-  @keyframes bump { 50% { transform: scale(1.25); } }
+  @keyframes bump { 50% { transform: scale(1.2); } }
 
   /* matches */
   .list { display: grid; gap: 12px; }
   .match { display: flex; gap: 14px; align-items: center; padding: 12px; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 22px; box-shadow: var(--shadow); cursor: pointer; text-align: left; width: 100%; transition: transform .15s; }
-  .match:hover { transform: translateY(-2px); border-color: var(--warm); }
-  .thumb { width: 80px; height: 60px; border-radius: 16px; background: linear-gradient(160deg, var(--c1), var(--c2)); flex: none; display: grid; place-items: center; overflow: hidden; }
-  .thumb svg { width: 68px; }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    border-radius: 20px; cursor: pointer; text-align: left; width: 100%; transition: transform .15s, border-color .15s; }
+  .match:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .thumb { width: 88px; height: 60px; border-radius: 14px; background: var(--studio); flex: none; display: grid; place-items: center; overflow: hidden; }
+  .thumb svg { width: 72px; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
   .match b { display: block; }
   .match small { color: var(--muted); }
   .match .go { margin-left: auto; color: var(--accent-text); font-weight: 750; white-space: nowrap; }
 
   /* mission */
-  .hero-car { border-radius: 26px; padding: 16px; color: #fff; background: linear-gradient(160deg, var(--c1), var(--c2)); display: grid; gap: 4px; box-shadow: var(--shadow-lg); }
-  .hero-car h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
-  .hero-img { width: 100%; height: 170px; object-fit: cover; border-radius: 18px; margin-bottom: 8px; }
-  .credit { font-size: 11px; color: rgba(255,255,255,.8); }
-  .tip { padding: 14px 16px; border-radius: 20px; background: color-mix(in srgb, var(--warm) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warm) 40%, transparent); }
+  .hero-car { border-radius: 24px; padding: 14px; color: #fff; background: linear-gradient(165deg, var(--c1) 30%, var(--c2)); display: grid; gap: 4px; box-shadow: var(--shadow-lg); }
+  .hero-car h2 { margin: 0; font-size: 24px; letter-spacing: -.01em; text-transform: uppercase; }
+  .hero-img { width: 100%; height: 170px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; background: var(--studio); }
+  .credit { font-size: 11px; color: rgba(255,255,255,.75); }
+  .tip { padding: 14px 16px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
   .tip p { margin: 6px 0 0; }
   .mission { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-  .mission li { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; }
-  .mission .num { width: 28px; height: 28px; border-radius: 10px; background: var(--accent); color: var(--on-accent);
+  .mission li { display: flex; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+  .mission .num { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--on-accent);
     font-weight: 800; font-size: 14px; display: grid; place-items: center; flex: none; }
   .mission b { display: block; }
   .mission small { color: var(--muted); }
-  .source { font-size: 12px; color: var(--muted); margin: 0; }
+  .source { font-size: 11.5px; color: var(--muted); margin: 0; }
 
   /* booking */
-  .dealer { padding: 16px; background: var(--surface); border: 2px solid transparent; border-radius: 22px; box-shadow: var(--shadow); display: grid; gap: 10px; }
+  .dealer { padding: 16px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; display: grid; gap: 10px; }
   .dealer.active { border-color: var(--accent); }
   .dealer small { color: var(--muted); }
   .near { color: var(--accent-text); font-weight: 700; }
   .slots { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-  .slot { flex: none; border: 1px solid var(--line); background: var(--surface2); border-radius: 14px;
+  .slot { flex: none; border: 1px solid var(--line); background: var(--surface2); border-radius: 12px;
     padding: 8px 12px; font-size: 12px; cursor: pointer; text-align: center; line-height: 1.25; }
   .slot b { display: block; font-size: 15px; }
   .slot.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
   .field { display: grid; gap: 6px; }
-  .field input { background: var(--surface); border: 1px solid var(--line); color: var(--text); border-radius: 16px; padding: 14px; font: inherit; }
-  .field input:focus { outline: 3px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 1px; }
+  .field input { background: var(--surface); border: 1px solid var(--line); color: var(--text); border-radius: 14px; padding: 14px; font: inherit; }
+  .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   .plz-input { font-size: 22px !important; letter-spacing: .18em; font-weight: 700 !important; }
   .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); cursor: pointer; }
-  .consent input { width: 20px; height: 20px; accent-color: var(--warm); flex: none; margin: 2px 0 0; }
+  .consent input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 2px 0 0; }
   .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
 
   /* ticket (boarding-pass look) */
-  .ticket { position: relative; background: #fff; color: #17191f; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow-lg); animation: bounce-in .6s cubic-bezier(.3,1.5,.5,1); }
-  .ticket-head { padding: 16px 20px; background: linear-gradient(100deg, #c6ff3d, #ffb38a); display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 800; }
+  .ticket { position: relative; background: #fff; color: #151515; border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-lg); animation: bounce-in .6s cubic-bezier(.3,1.5,.5,1); }
+  .ticket-head { padding: 16px 20px; background: linear-gradient(100deg, #151515, #3a2a20); color: #f2efe9; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .04em; }
+  .ticket-head span:first-child { color: #e2b48f; }
   .ticket-body { padding: 20px; display: grid; gap: 12px; justify-items: center; text-align: center; }
   .ticket-body img { width: 190px; height: 190px; }
   .code { font: 800 34px/1 ui-monospace, Consolas, monospace; letter-spacing: .18em; }
-  .ticket-rows { position: relative; width: 100%; display: grid; gap: 8px; text-align: left; border-top: 2px dashed #ddd6ca; padding-top: 14px; font-size: 15px; }
+  .ticket-rows { position: relative; width: 100%; display: grid; gap: 8px; text-align: left; border-top: 2px dashed #ddd5c9; padding-top: 14px; font-size: 15px; }
   .ticket-rows::before, .ticket-rows::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); }
   .ticket-rows::before { left: -32px; }
   .ticket-rows::after { right: -32px; }
   .ticket-rows div { display: flex; justify-content: space-between; gap: 12px; }
-  .ticket-rows span { color: #6a6f7c; flex: none; }
+  .ticket-rows span { color: #6b6660; flex: none; }
   .ticket-rows b { text-align: right; }
   .celebrate { text-align: center; }
-  .celebrate .title { font-size: 26px; }
+  .celebrate .title { font-size: 26px; text-transform: uppercase; }
 
   /* playful effects */
   .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
-  .confetti i { position: absolute; top: -14px; width: 8px; height: 14px; border-radius: 2px; animation: fall 1.9s cubic-bezier(.2,.6,.4,1) forwards; }
+  .confetti i { position: absolute; top: -14px; width: 7px; height: 13px; border-radius: 2px; animation: fall 1.9s cubic-bezier(.2,.6,.4,1) forwards; }
   @keyframes fall { to { transform: translate(var(--x), 105vh) rotate(var(--r)); } }
-  .fly { position: fixed; z-index: 60; font-size: 36px; pointer-events: none; transform: translate(-50%, -50%); animation: fly .9s ease-out forwards; }
-  @keyframes fly { to { transform: translate(-50%, -170%) scale(1.6); opacity: 0; } }
+  .fly { position: fixed; z-index: 60; font-size: 34px; pointer-events: none; transform: translate(-50%, -50%); animation: fly .9s ease-out forwards; }
+  @keyframes fly { to { transform: translate(-50%, -170%) scale(1.5); opacity: 0; } }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--text); color: var(--bg);
     padding: 12px 18px; border-radius: 99px; font-weight: 650; z-index: 70; max-width: calc(100% - 40px); text-align: center; box-shadow: var(--shadow-lg); }
 </style>
@@ -271,7 +274,10 @@
 <main class="app">
 
   <header class="appbar">
-    <button class="home" id="home-logo" aria-label="Zur Startseite"><span class="logo">match<span>&amp;</span>meet</span></button>
+    <button class="home" id="home-logo" aria-label="Zur Startseite">
+      <svg class="mark" viewBox="0 0 40 28" aria-hidden="true"><path d="M0 28 L10 0 L20 18 L30 0 L40 28 L32 28 L28 14 L20 28 L12 14 L8 28 Z" fill="currentColor"/></svg>
+      <span class="lockup"><span class="wordmark">MATCH<i>/</i>MEET</span><span class="for">FOR CUPRA</span></span>
+    </button>
     <div class="appbar-right">
       <button class="icon-btn" id="home-btn" aria-label="Zur Startseite" hidden>🏠</button>
       <button class="icon-btn" id="theme-btn" aria-label="Hell- oder Dunkelmodus">🌙</button>
@@ -281,20 +287,25 @@
   <!-- 1 Start -->
   <section class="view" id="v-start">
     <div class="hero">
-      <div class="floaters" aria-hidden="true"><span>🚗</span><span>❤️</span><span>⚡</span></div>
-      <span class="pill">Gratis · alle Marken · ohne Verkaufsdruck</span>
-      <h1>Swipe dich zu deinem <em>Traumauto.</em></h1>
-      <p>6 Fragen antippen, Autos swipen und mit Plan zur Probefahrt.</p>
+      <p class="eyebrow">Match/Meet for CUPRA</p>
+      <h1><span>Dein nächster CUPRA.</span><strong>In zwei Minuten gematcht.</strong></h1>
+      <div class="rule"></div>
+      <p class="lead">Sechs Fragen antippen, Modelle swipen und mit persönlicher Mission zur Probefahrt beim CUPRA-Partner.</p>
     </div>
+    <figure class="hero-visual"><img src="/assets/cupra/terramar.webp" alt="CUPRA Terramar"></figure>
     <button class="resume" id="resume-btn" hidden><span>↩︎ Weiter, wo du warst</span><span>→</span></button>
-    <div class="steps">
-      <div class="step"><div class="ico">👆</div><div><b>Tipp dich durch deinen Alltag</b><small>30 Sekunden, keine Tipparbeit</small></div></div>
-      <div class="step"><div class="ico">🔥</div><div><b>Swipe deine Matches</b><small>Passende Modelle aller Marken</small></div></div>
-      <div class="step"><div class="ico">🗺️</div><div><b>Probefahrt-Mission</b><small>Dein Testplan für die Garage in der Nähe</small></div></div>
+    <ol class="steps">
+      <li><span>01</span><div><b>Alltag antippen</b><small>6 Fragen, 30 Sekunden</small></div></li>
+      <li><span>02</span><div><b>Modelle swipen</b><small>Die CUPRA-Modelle, die zu dir passen</small></div></li>
+      <li><span>03</span><div><b>Mit Plan probefahren</b><small>Deine Mission beim CUPRA-Partner in der Nähe</small></div></li>
+    </ol>
+    <button class="btn big" id="start-btn" disabled>Match starten</button>
+    <div class="models">
+      <p class="eyebrow">Die Modelle</p>
+      <div class="model-strip" id="model-strip"></div>
     </div>
-    <div class="spacer"></div>
-    <button class="btn big" id="start-btn" disabled>Los geht's 🚀</button>
-    <p class="fineprint">🔒 Dein Profil geht nur mit deiner Zustimmung an die Garage.<br>Prototyp mit Beispieldaten.</p>
+    <p class="disclaimer">Konzeptstudie (Studienprojekt UFENA1). Kein offizielles Angebot von CUPRA. Bilder: CUPRA.<br>
+      Verbrauchs- und CO₂-Angaben auf den Modellkarten. 🔒 Dein Profil geht nur mit deiner Zustimmung an den CUPRA-Partner.</p>
   </section>
 
   <!-- 2 Quiz -->
@@ -324,14 +335,14 @@
   <section class="view" id="v-team" hidden>
     <div class="team">
       <div class="team-emoji" id="team-emoji"></div>
-      <span class="muted">Dein Fahrprofil</span>
+      <span class="eyebrow">Dein Fahrprofil</span>
       <h2 class="title" id="team-name"></h2>
       <p id="team-text"></p>
       <div class="tags" id="team-tags" style="justify-content:center;margin-top:8px"></div>
     </div>
     <p class="muted" style="text-align:center;margin:0" id="team-count"></p>
     <div class="spacer"></div>
-    <button class="btn big" id="team-go">Zeig mir meine Matches 🔥</button>
+    <button class="btn big" id="team-go">Zeig mir meine Matches</button>
   </section>
 
   <!-- 3 Swipe -->
@@ -353,9 +364,10 @@
     <div class="subbar">
       <button class="link" id="reswipe">↺ Nochmal swipen</button>
     </div>
-    <h2 class="title" id="matches-title">Deine Matches 🔥</h2>
-    <p class="muted" id="matches-note" style="margin:-8px 0 0">Wähle ein Auto für deine Probefahrt-Mission.</p>
+    <h2 class="title" id="matches-title">Deine Matches</h2>
+    <p class="muted" id="matches-note" style="margin:-8px 0 0">Wähle ein Modell für deine Probefahrt-Mission.</p>
     <div class="list" id="match-list"></div>
+    <p class="source">Verbrauchs- und Emissionswerte nach WLTP, Herstellerangaben. Preise und Masse sind Beispielwerte.</p>
   </section>
 
   <!-- 4b Mission -->
@@ -367,13 +379,13 @@
     <div class="hero-car" id="mission-car"></div>
     <div>
       <h2 class="title">Deine Probefahrt-Mission</h2>
-      <p class="muted" style="margin:6px 0 0">Das testest du bei der Garage, damit deine Fragen wirklich beantwortet werden.</p>
+      <p class="muted" style="margin:6px 0 0">Das testest du beim CUPRA-Partner, damit deine Fragen wirklich beantwortet werden.</p>
     </div>
     <div class="tip"><b>✨ Match-Tipp</b><p id="tip-text"></p></div>
     <ol class="mission" id="mission-list"></ol>
     <p class="source" id="mission-source"></p>
     <div class="spacer"></div>
-    <button class="btn big" id="to-booking">Probefahrt buchen 📅</button>
+    <button class="btn big" id="to-booking">Probefahrt buchen</button>
   </section>
 
   <!-- 5a Booking -->
@@ -382,24 +394,24 @@
       <button class="link" data-go="v-mission">← Mission</button>
     </div>
     <h2 class="title" id="booking-title">Termin wählen</h2>
-    <label class="field"><span class="muted">📍 Deine PLZ: Wir zeigen dir die nächsten Garagen</span>
+    <label class="field"><span class="muted">📍 Deine PLZ: Wir zeigen dir die nächsten CUPRA-Partner</span>
       <input id="plz" class="plz-input" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="z. B. 8400"></label>
     <p class="muted" id="plz-info" hidden style="margin:0"></p>
     <div class="list" id="dealer-list"></div>
     <div id="booking-form" class="list" hidden>
       <label class="field"><span class="muted">Dein Vorname</span><input id="vorname" maxlength="40" autocomplete="given-name" placeholder="z. B. Lea oder Luca"></label>
       <label class="consent"><input type="checkbox" id="consent" checked>
-        <span>Die Garage darf mein Kurzprofil (Alltag, Wünsche, offene Fragen) und meine Mission sehen, damit sie sich vorbereiten kann.</span></label>
-      <button class="btn big" id="book-btn">Verbindlich buchen ✅</button>
-      <p class="fineprint">Kostenlos für dich. Die Garage bezahlt die Plattform.</p>
+        <span>Der CUPRA-Partner darf mein Kurzprofil (Alltag, Wünsche, offene Fragen) und meine Mission sehen, damit er sich vorbereiten kann.</span></label>
+      <button class="btn big" id="book-btn">Verbindlich buchen</button>
+      <p class="fineprint">Kostenlos für dich. Der Partner bezahlt die Plattform.</p>
     </div>
   </section>
 
   <!-- 5b Ticket -->
   <section class="view" id="v-ticket" hidden>
     <div class="celebrate">
-      <h2 class="title">Probefahrt gebucht! 🎉</h2>
-      <p class="muted" style="margin:6px 0 0">Zeig das Ticket in der Garage, dann geht's los.</p>
+      <h2 class="title">Probefahrt gebucht</h2>
+      <p class="muted" style="margin:6px 0 0">Zeig das Ticket beim CUPRA-Partner, dann geht's los. 🎉</p>
     </div>
     <div class="ticket" id="ticket"></div>
     <h2 class="title" style="font-size:22px">Deine Mission für den Termin</h2>
@@ -418,7 +430,8 @@ const state = { quiz: [], step: 0, selection: {}, advancing: false,
 
 const PARKEN = { eng: 'Enge Tiefgarage', strasse: 'Parkt an der Strasse', eigener_platz: 'Eigener Parkplatz' };
 const LADEN = { zuhause: 'Laden zuhause', arbeit: 'Laden bei der Arbeit', nein: 'Keine Lademöglichkeit' };
-const BUDGET_PRESETS = [25000, 40000, 60000];
+const MODEL_STRIP = [['raval', 'Raval'], ['born', 'Born'], ['tavascan', 'Tavascan'], ['leon', 'Leon'],
+                     ['leon-sportstourer', 'Leon Sportstourer'], ['formentor', 'Formentor'], ['terramar', 'Terramar']];
 const TEAMS = {
   familie: ['👨‍👩‍👧', 'Team Familienkutsche', 'Platz, Sicherheit und ein Kofferraum, der alles schluckt.'],
   abenteuer: ['🏔️', 'Team Abenteuer', 'Velo rein, Hund rein, ab in die Berge: Hauptsache, alles passt mit.'],
@@ -478,7 +491,7 @@ function setLoading(title, sub) {
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   $('#theme-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
-  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0e1016' : '#f6f3ee';
+  document.querySelector('meta[name="theme-color"]').content = theme === 'dark' ? '#0c0d0f' : '#f4f1ec';
 }
 
 function toggleTheme() {
@@ -489,10 +502,10 @@ function toggleTheme() {
 
 function confetti() {
   if (calm()) return;
-  const colors = ['#c6ff3d', '#ff8a5c', '#7c5cff', '#3dd6ff', '#ffd43b', '#ff6b8b'];
+  const colors = ['#c8875a', '#8a4f2a', '#e2b48f', '#151515', '#f2efe9'];
   const box = document.createElement('div');
   box.className = 'confetti';
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < 60; i++) {
     const piece = document.createElement('i');
     piece.style.left = Math.random() * 100 + '%';
     piece.style.background = colors[i % colors.length];
@@ -532,22 +545,28 @@ function carSvg(car) {
   return `<svg viewBox="0 0 300 116" aria-hidden="true">
     <ellipse cx="154" cy="110" rx="132" ry="5" fill="rgba(0,0,0,.35)"/>
     <g ${tall}>
-      <path d="M20 78 C20 66 28 60 42 58 L88 54 C104 38 122 28 150 26 L196 26 C218 26 236 40 252 54 L270 58 C282 60 288 66 288 76 L288 84 C288 88 285 90 281 90 L262 90 A26 26 0 0 0 210 90 L96 90 A26 26 0 0 0 44 90 L26 90 C22 90 20 88 20 84 Z" fill="rgba(255,255,255,.93)"/>
-      <path d="M100 54 C114 42 128 34 150 33 L176 33 L176 54 Z" fill="${car.farbe[0]}" opacity=".85"/>
-      <path d="M184 33 L196 33 C214 33 228 43 240 54 L184 54 Z" fill="${car.farbe[0]}" opacity=".85"/>
-      <rect x="262" y="62" width="18" height="6" rx="3" fill="${car.farbe[1]}"/>
+      <path d="M20 78 C20 66 28 60 42 58 L88 54 C104 38 122 28 150 26 L196 26 C218 26 236 40 252 54 L270 58 C282 60 288 66 288 76 L288 84 C288 88 285 90 281 90 L262 90 A26 26 0 0 0 210 90 L96 90 A26 26 0 0 0 44 90 L26 90 C22 90 20 88 20 84 Z" fill="rgba(40,40,40,.85)"/>
+      <path d="M100 54 C114 42 128 34 150 33 L176 33 L176 54 Z" fill="#9aa3b5" opacity=".7"/>
+      <path d="M184 33 L196 33 C214 33 228 43 240 54 L184 54 Z" fill="#9aa3b5" opacity=".7"/>
+      <rect x="262" y="62" width="18" height="6" rx="3" fill="#c8875a"/>
     </g>
     <circle cx="70" cy="90" r="20" fill="#0b0d12"/><circle cx="70" cy="90" r="9" fill="#9aa3b5"/>
     <circle cx="236" cy="90" r="20" fill="#0b0d12"/><circle cx="236" cy="90" r="9" fill="#9aa3b5"/>
   </svg>`;
 }
 
-// Real photo (Wikimedia Commons, with credit); the drawn silhouette is the fallback if it fails to load.
+// Studio photo (CUPRA) or free Wikimedia photo with credit; the drawn silhouette is the fallback.
 function carArt(car) {
-  if (!car.bild_url) return `<div class="car-art">${carSvg(car)}</div>`;
+  if (!car.bild_url) return `<figure class="photo broken">${carSvg(car)}</figure>`;
   return `<figure class="photo"><img src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" loading="lazy"
     draggable="false" onerror="this.parentElement.classList.add('broken')">${carSvg(car)}
     <figcaption>${esc(car.bild_quelle || '')}</figcaption></figure>`;
+}
+
+// Consumption and CO2 as published by the maker (required context when advertising cars).
+function energyLine(car) {
+  if (!car.verbrauch) return 'Verbrauchs- und CO₂-Angaben beim CUPRA-Partner';
+  return `Verbrauch ${car.verbrauch} · CO₂ ${car.co2} · CO₂-Klasse ${car.co2_klasse}`;
 }
 
 function carFacts(car) {
@@ -587,7 +606,7 @@ function renderStep() {
   $('#quiz-q').textContent = step.frage;
   $('#quiz-hint').textContent = step.hinweis || '';
   $('#quiz-hint').hidden = !step.hinweis;
-  $('#quiz-next').textContent = last ? 'Fertig, zeig mein Profil ✨' : 'Weiter';
+  $('#quiz-next').textContent = last ? 'Mein Profil zeigen' : 'Weiter';
 
   const body = $('#quiz-body');
   body.classList.remove('enter');
@@ -601,14 +620,14 @@ function renderStep() {
       <div class="slider-value" id="slider-value"></div>
       <input type="range" id="slider" min="${step.min}" max="${step.max}" step="${step.step}" value="${value}" aria-label="Budget">
       <div class="slider-scale"><span>${chf(step.min)}</span><span>offen</span></div>
-      <div class="presets">${BUDGET_PRESETS.map(v => `<button type="button" class="preset" data-v="${v}">${chf(v)}</button>`).join('')}</div>
+      <div class="presets">${(step.presets || []).map(v => `<button type="button" class="preset" data-v="${v}">${chf(v)}</button>`).join('')}</div>
     </div>`;
     const update = () => {
       const v = Number($('#slider').value);
       state.selection[step.key] = v;
       $('#slider-value').textContent = v >= step.max ? 'Budget offen' : 'bis ' + chf(v);
       // The emoji grows with the budget: a small playful cue.
-      $('#slider-emoji').textContent = v >= step.max ? '🤩' : v >= 60000 ? '💎' : v >= 35000 ? '💰' : '🪙';
+      $('#slider-emoji').textContent = v >= step.max ? '🤩' : v >= 55000 ? '💎' : v >= 38000 ? '💰' : '🪙';
       $('#slider-emoji').style.transform = `scale(${0.8 + 0.5 * (v - step.min) / (step.max - step.min)})`;
     };
     $('#slider').oninput = update;
@@ -684,7 +703,7 @@ function teamFor(s) {
 
 async function findMatches() {
   show('v-loading');
-  setLoading('Wir suchen deine Matches …', 'Alle Marken, passend zu deinem Alltag');
+  setLoading('Wir suchen deine Matches …', 'Aus allen CUPRA-Modellen, passend zu deinem Alltag');
   try {
     const [p] = await Promise.all([api('/api/profile', { auswahl: state.selection }), wait(900)]);
     state.profile = p.profil;
@@ -695,7 +714,7 @@ async function findMatches() {
     $('#team-name').textContent = name;
     $('#team-text').textContent = text;
     $('#team-tags').innerHTML = profileTags(state.profile).map(t => `<span>${esc(t)}</span>`).join('');
-    $('#team-count').textContent = `${m.cars.length} Autos warten auf dein Swipe.`;
+    $('#team-count').textContent = `${m.cars.length} CUPRA-Modelle warten auf dein Swipe.`;
     show('v-team');
     confetti();
   } catch (e) {
@@ -711,13 +730,16 @@ function startSwipe() {
 }
 
 function cardHtml(car) {
+  const editions = car.editionen && car.editionen.length ? `<div class="editions">Auch als ${esc(car.editionen.join(' / '))}</div>` : '';
   return `
     <div class="card-top"><span class="brand">${esc(car.marke)}</span><span class="pct">${car.match_pct}% Match</span></div>
     ${carArt(car)}
     <h3>${esc(car.modell)}</h3>
-    <div class="sub">${esc(car.antrieb)} · ${esc(car.segment)} · <b>${chf(car.preis_chf)}</b></div>
+    <div class="sub">${esc(car.leistung || car.antrieb)} · ${esc(car.segment)} · <b>ab ${chf(car.preis_chf)}</b></div>
+    ${editions}
     <div class="facts">${carFacts(car).map(([v, l]) => `<div><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>
     <ul class="why">${car.gruende.map(g => `<li>${esc(g)}</li>`).join('')}</ul>
+    <div class="energy">${esc(energyLine(car))}</div>
     <div class="stamp like">MATCH</div><div class="stamp nope">NOPE</div>`;
 }
 
@@ -790,11 +812,11 @@ function finishSwipe() {
   let list = state.liked;
   if (!list.length) {
     list = state.cars.slice(0, 3);
-    $('#matches-title').textContent = 'Deine Top 3 🔥';
-    $('#matches-note').textContent = 'Kein Herz vergeben? Kein Problem, das passt laut deinem Profil am besten.';
+    $('#matches-title').textContent = 'Deine Top 3';
+    $('#matches-note').textContent = 'Kein Herz vergeben? Kein Problem, diese Modelle passen laut deinem Profil am besten.';
   } else {
-    $('#matches-title').textContent = `${list.length} Match${list.length === 1 ? '' : 'es'}! 🎉`;
-    $('#matches-note').textContent = 'Wähle ein Auto für deine Probefahrt-Mission.';
+    $('#matches-title').textContent = `${list.length} Match${list.length === 1 ? '' : 'es'} 🎉`;
+    $('#matches-note').textContent = 'Wähle ein Modell für deine Probefahrt-Mission.';
     confetti();
   }
   $('#match-list').innerHTML = '';
@@ -802,8 +824,8 @@ function finishSwipe() {
     const b = document.createElement('button');
     b.className = 'match';
     const thumb = car.bild_url ? `<img src="${esc(car.bild_url)}" alt="" loading="lazy" onerror="this.remove()">` : carSvg(car);
-    b.innerHTML = `<div class="thumb" style="${carColors(car)}">${thumb}</div>
-      <div><b>${esc(car.marke)} ${esc(car.modell)}</b><small>${car.match_pct}% Match · ${chf(car.preis_chf)}</small></div>
+    b.innerHTML = `<div class="thumb">${thumb}</div>
+      <div><b>${esc(car.modell)}</b><small>${car.match_pct}% Match · ab ${chf(car.preis_chf)}</small></div>
       <span class="go">Mission →</span>`;
     b.onclick = () => openMission(car);
     $('#match-list').append(b);
@@ -827,16 +849,19 @@ async function openMission(car) {
     const r = await api('/api/mission', { profile: state.profile, car_id: car.id });
     state.mission = r.items;
     $('#tip-text').textContent = r.tipp;
-    source = 'Aus deinem Profil erstellt · Fahrzeugdaten aus der Modelldatenbank';
+    source = 'Aus deinem Profil erstellt · Verbrauchs- und Emissionswerte nach WLTP, Herstellerangaben';
   } catch (e) {
     state.mission = [];
     toast(e.message);
   }
   const photo = car.bild_url ? `<img class="hero-img" src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" onerror="this.remove()">` : '';
-  const credit = car.bild_link ? `<a class="credit" href="${esc(car.bild_link)}" target="_blank" rel="noopener">${esc(car.bild_quelle)}</a>` : '';
+  const credit = car.bild_link
+    ? `<a class="credit" href="${esc(car.bild_link)}" target="_blank" rel="noopener">${esc(car.bild_quelle)}</a>`
+    : `<span class="credit">${esc(car.bild_quelle || '')}</span>`;
   $('#mission-car').style.cssText = carColors(car);
   $('#mission-car').innerHTML = `${photo}<span class="brand">${esc(car.marke)} · ${car.match_pct}% Match</span>
-    <h2>${esc(car.modell)}</h2><div class="sub">${esc(car.antrieb)} · ${chf(car.preis_chf)}</div>${credit}`;
+    <h2>${esc(car.modell)}</h2><div class="sub">${esc(car.leistung || car.antrieb)} · ab ${chf(car.preis_chf)}</div>
+    <div class="energy" style="margin-top:6px">${esc(energyLine(car))}</div>${credit}`;
   $('#mission-list').innerHTML = missionHtml(state.mission);
   $('#mission-source').textContent = source;
   show('v-mission');
@@ -848,7 +873,7 @@ async function openMission(car) {
 function openBooking() {
   const car = state.car;
   state.dealer = null; state.slot = null;
-  $('#booking-title').textContent = `${car.marke} ${car.modell} probefahren`;
+  $('#booking-title').textContent = `${car.modell} probefahren`;
   $('#dealer-list').innerHTML = '';
   $('#booking-form').hidden = true;
   $('#plz-info').hidden = true;
@@ -880,13 +905,13 @@ async function loadDealers() {
   if (request !== state.dealerRequest) return;
   const near = r.dealers.filter(d => d.distanz_km <= r.radius_km).length;
   info.textContent = `📍 ${r.ort.plz} ${r.ort.ort}: ` + (near
-    ? `${near} ${car.marke}-Garage${near === 1 ? '' : 'n'} im Umkreis von ${r.radius_km} km`
-    : `keine ${car.marke}-Garage im Umkreis von ${r.radius_km} km, hier die nächsten`);
+    ? `${near} CUPRA-Partner im Umkreis von ${r.radius_km} km`
+    : `kein CUPRA-Partner im Umkreis von ${r.radius_km} km, hier die nächsten`);
   info.hidden = false;
   list.innerHTML = '';
   $('#booking-form').hidden = !r.dealers.length;
   if (!r.dealers.length) {
-    list.innerHTML = `<div class="empty">Noch keine Partner-Garage für ${esc(car.marke)}.<br>Wähle ein anderes Match.</div>`;
+    list.innerHTML = '<div class="empty">Noch kein CUPRA-Partner auf der Plattform.<br>Wähle ein anderes Match.</div>';
   }
   r.dealers.forEach(d => {
     const box = document.createElement('div');
@@ -929,14 +954,14 @@ async function book() {
 
 function renderTicket(b) {
   $('#ticket').innerHTML = `
-    <div class="ticket-head"><span>🎟️ Probefahrt-Ticket</span><span>${esc(b.slot_label)}</span></div>
+    <div class="ticket-head"><span>PROBEFAHRT-TICKET</span><span>${esc(b.slot_label)}</span></div>
     <div class="ticket-body">
       <img src="/api/bookings/${encodeURIComponent(b.code)}/qr.svg" alt="QR-Code für den Check-in">
       <div class="code">${esc(b.code)}</div>
-      <small style="color:#6a6f7c">Zeig diesen Code in der Garage, dort wirst du per Scan eingecheckt.</small>
+      <small style="color:#6b6660">Zeig diesen Code beim CUPRA-Partner, dort wirst du per Scan eingecheckt.</small>
       <div class="ticket-rows">
-        <div><span>Auto</span><b>${esc(b.auto)}</b></div>
-        <div><span>Garage</span><b>${esc(b.haendler)}</b></div>
+        <div><span>Modell</span><b>${esc(b.auto)}</b></div>
+        <div><span>Partner</span><b>${esc(b.haendler)}</b></div>
         <div><span>Adresse</span><b>${esc(b.adresse)}</b></div>
         <div><span>Name</span><b>${esc(b.vorname)}</b></div>
         <div><span>Kurzprofil</span><b>${b.profil_freigabe ? 'geteilt ✓' : 'nicht geteilt'}</b></div>
@@ -947,6 +972,8 @@ function renderTicket(b) {
 
 /* ---------- wiring ---------- */
 
+$('#model-strip').innerHTML = MODEL_STRIP.map(([file, name]) =>
+  `<figure><div class="pic"><img src="/assets/cupra/${file}.webp" alt="CUPRA ${name}" loading="lazy"></div><figcaption>${name}</figcaption></figure>`).join('');
 document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go)));
 $('#home-logo').onclick = () => show('v-start');
 $('#home-btn').onclick = () => show('v-start');
