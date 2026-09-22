@@ -160,7 +160,7 @@ function renderBookings(list) {
     <article class="booking">
       <div class="row">
         <div class="when">${esc(b.slot_label)}</div>
-        <div class="who"><b>${esc(b.vorname)}</b> · ${esc(b.auto)}</div>
+        <div class="who"><b>${esc(b.vorname)} ${esc(b.nachname || '')}</b> · ${esc(b.auto)}</div>
         <span class="code">${esc(b.code)}</span>
         <span class="status ${esc(b.status)}">${b.status === 'qualifiziert' ? '✓ qualifiziert · ' + chf(b.fee_chf) : 'gebucht'}</span>
         ${b.status === 'gebucht' ? `<button class="btn small" data-checkin="${esc(b.code)}">Manuell einchecken</button>` : ''}

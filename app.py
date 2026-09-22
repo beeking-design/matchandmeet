@@ -100,6 +100,9 @@ def ensure_schema():
         for col, typ in (("plz", "TEXT"), ("lat", "REAL"), ("lon", "REAL")):
             if col not in existing_cols:
                 q(conn, f"ALTER TABLE dealers ADD COLUMN {col} {typ}")
+        # Migration: bookings made before the last name was collected.
+        if "nachname" not in column_names(conn, "bookings"):
+            q(conn, "ALTER TABLE bookings ADD COLUMN nachname TEXT")
         # Seed sync: add new sample dealers/cars and photos, but never overwrite admin edits
         # and never bring back what was deleted in the admin console.
         deleted = {(r["kind"], r["id"]) for r in q(conn, "SELECT kind, id FROM deleted_seed").fetchall()}
@@ -232,7 +235,7 @@ def slots_for(conn, dealer_id):
 def booking_out(row, cars, dealers):
     car, dealer = cars.get(row["car_id"], {}), dealers.get(row["dealer_id"], {})
     return {
-        "code": row["code"], "created": row["created"], "vorname": row["vorname"],
+        "code": row["code"], "created": row["created"], "vorname": row["vorname"], "nachname": row["nachname"] or "",
         "status": row["status"], "fee_chf": row["fee_chf"], "checked_in": row["checked_in"],
         "slot": row["slot"], "slot_label": slot_label(row["slot"]),
         "car_id": row["car_id"], "auto": f"{car.get('marke', '')} {car.get('modell', '')}".strip() or row["car_id"],
@@ -347,14 +350,14 @@ QUIZ = [
         {"id": "eigen", "emoji": "🏠", "text": "Eigener Platz", "profil": {"parken": "eigener_platz"}},
         {"id": "wechselnd", "emoji": "🤷", "text": "Mal so, mal so", "profil": {"parken": "unklar"}},
     ]},
-    {"key": "fragen", "typ": "multi", "max": 3, "frage": "Was willst du bei der Probefahrt klären?",
-     "hinweis": "Bis zu 3 antippen. Daraus entsteht deine Probefahrt-Mission.", "optionen": [
-        {"id": "winter", "emoji": "❄️", "text": "Reichweite im Winter", "frage": "Reicht die Reichweite im Winter?"},
-        {"id": "kosten", "emoji": "💸", "text": "Kosten pro Monat", "frage": "Was kostet mich das Auto im Monat?"},
-        {"id": "garage", "emoji": "📏", "text": "Passt es in meine Garage?", "frage": "Passt es in meine Garage?"},
-        {"id": "laden", "emoji": "⚡", "text": "Laden unterwegs", "frage": "Wie lade ich unterwegs?"},
-        {"id": "platz", "emoji": "🧸", "text": "Platz auf der Rückbank", "frage": "Haben Mitfahrende hinten genug Platz?"},
-        {"id": "technik", "emoji": "📱", "text": "Handy & Technik", "frage": "Wie gut klappt die Technik mit meinem Handy?"},
+    {"key": "fragen", "typ": "single", "frage": "Was willst du bei der Probefahrt vor allem klären?",
+     "hinweis": "Daraus entsteht dein Probefahrt-Plan.", "optionen": [
+        {"id": "winter", "emoji": "❄️", "text": "Reichweite im Winter", "profil": {"offene_fragen": ["Reicht die Reichweite im Winter?"]}},
+        {"id": "kosten", "emoji": "💸", "text": "Kosten pro Monat", "profil": {"offene_fragen": ["Was kostet mich das Auto im Monat?"]}},
+        {"id": "garage", "emoji": "📏", "text": "Passt es in meine Garage?", "profil": {"offene_fragen": ["Passt es in meine Garage?"]}},
+        {"id": "laden", "emoji": "⚡", "text": "Laden unterwegs", "profil": {"offene_fragen": ["Wie lade ich unterwegs?"]}},
+        {"id": "platz", "emoji": "🧸", "text": "Platz auf der Rückbank", "profil": {"offene_fragen": ["Haben Mitfahrende hinten genug Platz?"]}},
+        {"id": "technik", "emoji": "📱", "text": "Handy & Technik", "profil": {"offene_fragen": ["Wie gut klappt die Technik mit meinem Handy?"]}},
     ]},
 ]
 
@@ -623,7 +626,8 @@ class ProfileRequest(BaseModel):
 
 
 class MatchRequest(BaseModel):
-    profile: dict
+    profile: dict = {}
+    auswahl: dict | None = None
 
 
 class MissionRequest(BaseModel):
@@ -636,6 +640,7 @@ class BookingRequest(BaseModel):
     dealer_id: str
     slot: str
     vorname: str
+    nachname: str = ""
     consent: bool = False
     profile: dict = {}
     mission: list[dict] = []
@@ -700,8 +705,10 @@ def profile(req: ProfileRequest):
 
 @app.post("/api/matches")
 def matches(req: MatchRequest):
+    # With "auswahl" the profile is built here too, which saves the client a second round trip.
+    profile = build_profile(req.auswahl) if req.auswahl is not None else req.profile
     with db() as conn:
-        return {"cars": find_matches(req.profile, customer_cars(conn), load_dealers(conn))}
+        return {"profil": profile, "cars": find_matches(profile, customer_cars(conn), load_dealers(conn))}
 
 
 @app.post("/api/mission")
@@ -744,20 +751,20 @@ def dealers(brand: str = "", plz: str = "", limit: int = 5):
 
 @app.post("/api/bookings")
 def create_booking(req: BookingRequest):
-    vorname = req.vorname.strip()[:40]
+    vorname, nachname = req.vorname.strip()[:40], req.nachname.strip()[:60]
     with db() as conn:
         car, dealer = customer_cars(conn).get(req.car_id), load_dealers(conn).get(req.dealer_id)
         if not car or not dealer or car["marke"] not in dealer["marken"]:
             raise HTTPException(400, "Dieser Händler führt das Modell nicht")
-        if not vorname:
-            raise HTTPException(400, "Bitte gib deinen Vornamen ein")
+        if not vorname or not nachname:
+            raise HTTPException(400, "Bitte gib Vor- und Nachnamen ein")
         if req.slot not in {s["id"] for s in slots_for(conn, dealer["id"])}:
             raise HTTPException(409, "Dieser Termin ist leider nicht mehr frei")
         code = "".join(secrets.choice(CODE_ALPHABET) for _ in range(6))
         # Profile and mission reach the garage only with the customer's consent.
-        q(conn, "INSERT INTO bookings (code, created, dealer_id, car_id, slot, vorname, profil_freigabe, profile_json, mission_json) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          (code, now(), dealer["id"], car["id"], req.slot, vorname, int(req.consent),
+        q(conn, "INSERT INTO bookings (code, created, dealer_id, car_id, slot, vorname, nachname, profil_freigabe, profile_json, mission_json) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          (code, now(), dealer["id"], car["id"], req.slot, vorname, nachname, int(req.consent),
            json.dumps(req.profile if req.consent else {}, ensure_ascii=False),
            json.dumps(req.mission[:6] if req.consent else [], ensure_ascii=False)))
         row = q(conn, "SELECT * FROM bookings WHERE code = ?", (code,)).fetchone()

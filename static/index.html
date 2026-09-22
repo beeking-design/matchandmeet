@@ -202,6 +202,23 @@
   .consent input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin: 2px 0 0; }
   .list { display: grid; gap: 12px; }
   .empty { padding: 18px; border: 1px dashed var(--line); border-radius: 18px; color: var(--muted); text-align: center; }
+  .book-hero { border-radius: 24px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); }
+  .book-hero .pic { height: 190px; background: var(--studio); overflow: hidden; }
+  .book-hero .pic img { width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; animation: drive-in 1s cubic-bezier(.2,.8,.2,1); }
+  .book-hero .info { padding: 14px 16px 16px; display: grid; gap: 4px; }
+  .book-hero h3 { margin: 0; font-size: 24px; line-height: 1.1; text-transform: uppercase; font-weight: 800; letter-spacing: -.01em; }
+  .book-hero .energy { border-top: 0; padding-top: 2px; }
+  .step-card { display: grid; gap: 12px; padding: 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; }
+  .step-head { display: flex; align-items: center; gap: 12px; }
+  .step-head span { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    font-weight: 800; font-size: 14px; background: var(--accent); color: var(--on-accent); }
+  .step-head h3 { margin: 0; font-size: 15px; text-transform: uppercase; letter-spacing: .1em; }
+  .step-card .dealer { background: var(--bg); }
+  .name-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .name-grid input { width: 100%; min-width: 0; }
+  @media (max-width: 360px) { .name-grid { grid-template-columns: 1fr; } }
+  .summary { padding: 12px 14px; border-radius: 14px; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 14px; }
+  .summary.ok { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent-text); }
 
   /* ticket (boarding-pass look) */
   .ticket { position: relative; background: #fff; color: #151515; border-radius: 26px; overflow: hidden; box-shadow: var(--shadow-lg); animation: bounce-in .6s cubic-bezier(.3,1.5,.5,1); }
@@ -317,18 +334,31 @@
     <div class="subbar">
       <button class="link" data-go="v-results">← Vorschläge</button>
     </div>
-    <h2 class="title">Probefahrt buchen</h2>
-    <div class="car-row" id="booking-car"></div>
+    <div class="book-hero" id="booking-car"></div>
     <div class="tip" id="booking-tip" hidden><b>✨ Match-Tipp</b><p id="tip-text"></p></div>
-    <label class="field"><span class="muted">📍 Deine PLZ: Wir zeigen dir die nächsten CUPRA-Partner</span>
-      <input id="plz" class="plz-input" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="z. B. 8400"></label>
-    <p class="muted" id="plz-info" hidden style="margin:0"></p>
-    <div class="list" id="dealer-list"></div>
-    <div id="booking-form" class="list" hidden>
-      <label class="field"><span class="muted">Dein Vorname</span><input id="vorname" maxlength="40" autocomplete="given-name" placeholder="z. B. Lea oder Luca"></label>
+
+    <div class="step-card">
+      <div class="step-head"><span>1</span><h3>Deine Angaben</h3></div>
+      <div class="name-grid">
+        <label class="field"><span class="muted">Vorname</span><input id="vorname" maxlength="40" autocomplete="given-name" placeholder="Lea"></label>
+        <label class="field"><span class="muted">Nachname</span><input id="nachname" maxlength="60" autocomplete="family-name" placeholder="Muster"></label>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-head"><span>2</span><h3>Partner &amp; Termin</h3></div>
+      <label class="field"><span class="muted">📍 Deine PLZ: Wir zeigen dir die nächsten CUPRA-Partner</span>
+        <input id="plz" class="plz-input" inputmode="numeric" maxlength="4" autocomplete="postal-code" placeholder="z. B. 8400"></label>
+      <p class="muted" id="plz-info" hidden style="margin:0"></p>
+      <div class="list" id="dealer-list"></div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-head"><span>3</span><h3>Bestätigen</h3></div>
+      <div class="summary" id="booking-summary"></div>
       <label class="consent"><input type="checkbox" id="consent" checked>
         <span>Der CUPRA-Partner darf mein Kurzprofil (Alltag, Wünsche, offene Fragen) und meinen Probefahrt-Plan sehen, damit er sich vorbereiten kann.</span></label>
-      <button class="btn big" id="book-btn">Verbindlich buchen</button>
+      <button class="btn big" id="book-btn">Jetzt Probefahrt buchen</button>
       <p class="fineprint">Kostenlos für dich. Der Partner bezahlt die Plattform.</p>
     </div>
   </section>
@@ -372,7 +402,6 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 const chf = (n) => 'CHF ' + Number(n).toLocaleString('de-CH');
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const sid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -512,13 +541,12 @@ function startQuiz() {
 function renderStep() {
   const step = state.quiz[state.step];
   const total = state.quiz.length;
-  const last = state.step === total - 1;
   $('#dots').innerHTML = state.quiz.map((_, i) => `<i class="${i < state.step ? 'on' : i === state.step ? 'now' : ''}"></i>`).join('');
   $('#quiz-count').textContent = `${state.step + 1}/${total}`;
   $('#quiz-q').textContent = step.frage;
   $('#quiz-hint').textContent = step.hinweis || '';
   $('#quiz-hint').hidden = !step.hinweis;
-  $('#quiz-next').textContent = last ? 'Vorschläge zeigen' : 'Weiter';
+  $('#quiz-next').textContent = 'Weiter';
 
   const body = $('#quiz-body');
   body.classList.remove('enter');
@@ -614,16 +642,18 @@ function teamFor(s) {
 /* ---------- driving profile & suggestions ---------- */
 
 async function findMatches() {
-  show('v-loading');
-  setLoading('Wir suchen deine Vorschläge …', 'Aus allen CUPRA-Modellen, passend zu deinem Alltag');
+  // One request for profile + suggestions; the loading screen only appears if it takes noticeably long.
+  const loader = setTimeout(() => { setLoading('Einen Moment …', 'Deine Vorschläge kommen gleich'); show('v-loading'); }, 300);
   try {
-    const [p] = await Promise.all([api('/api/profile', { auswahl: state.selection }), wait(900)]);
-    state.profile = p.profil;
-    state.cars = (await api('/api/matches', { profile: state.profile })).cars;
+    const r = await api('/api/matches', { auswahl: state.selection });
+    clearTimeout(loader);
+    state.profile = r.profil;
+    state.cars = r.cars;
     renderResults();
     show('v-results');
     confetti();
   } catch (e) {
+    clearTimeout(loader);
     toast(e.message);
     show('v-quiz');
   }
@@ -670,19 +700,20 @@ function planHtml(items) {
 
 function openBooking(car) {
   Object.assign(state, { car, mission: [], dealer: null, slot: null });
-  const thumb = car.bild_url ? `<img src="${esc(car.bild_url)}" alt="" onerror="this.remove()">` : '';
-  $('#booking-car').innerHTML = `<div class="thumb">${thumb}</div>
-    <div><b>${esc(car.modell)}</b><small>${esc(car.leistung || car.antrieb)} · ab ${chf(car.preis_chf)}</small>
-    <small>${esc(energyLine(car))}</small></div>`;
+  const pic = car.bild_url ? `<img src="${esc(car.bild_url)}" alt="${esc(car.marke)} ${esc(car.modell)}" onerror="this.remove()">` : '';
+  $('#booking-car').innerHTML = `<div class="pic">${pic}</div>
+    <div class="info"><span class="eyebrow">Deine Probefahrt</span><h3>${esc(car.modell)}</h3>
+    <div class="sub">${esc(car.leistung || car.antrieb)} · ab ${chf(car.preis_chf)}</div>
+    <div class="energy">${esc(energyLine(car))}</div></div>`;
   $('#booking-tip').hidden = true;
   $('#dealer-list').innerHTML = '';
-  $('#booking-form').hidden = true;
   $('#plz-info').hidden = true;
+  updateSummary();
   show('v-booking');
   track('mission_open');
   $('#plz').value = state.plz;
   if (state.plz) loadDealers();
-  else $('#plz').focus();
+  if (!$('#vorname').value) $('#vorname').focus();
   // Tip and test-drive plan load in the background; the plan goes to the partner and onto the ticket.
   state.missionRequest = api('/api/mission', { profile: state.profile, car_id: car.id })
     .then(r => {
@@ -694,12 +725,21 @@ function openBooking(car) {
     .catch(() => {});
 }
 
+function updateSummary() {
+  const box = $('#booking-summary');
+  box.classList.toggle('ok', !!state.slot);
+  box.textContent = state.slot
+    ? `📅 ${state.slot.tag} · ${state.slot.zeit} Uhr bei ${state.dealer.name}`
+    : 'Wähle oben einen CUPRA-Partner und einen Termin.';
+}
+
 async function loadDealers() {
   const plz = $('#plz').value.trim();
   if (!/^\d{4}$/.test(plz)) return;
   const car = state.car;
   const request = ++state.dealerRequest; // ignore answers to older PLZ inputs
   Object.assign(state, { plz, dealer: null, slot: null });
+  updateSummary();
   const list = $('#dealer-list');
   const info = $('#plz-info');
   let r;
@@ -708,7 +748,6 @@ async function loadDealers() {
   } catch (e) {
     if (request !== state.dealerRequest) return;
     list.innerHTML = '';
-    $('#booking-form').hidden = true;
     info.textContent = e.message;
     info.hidden = false;
     return;
@@ -720,7 +759,6 @@ async function loadDealers() {
     : `kein CUPRA-Partner im Umkreis von ${r.radius_km} km, hier die nächsten`);
   info.hidden = false;
   list.innerHTML = '';
-  $('#booking-form').hidden = !r.dealers.length;
   if (!r.dealers.length) {
     list.innerHTML = '<div class="empty">Noch kein CUPRA-Partner auf der Plattform.<br>Wähle einen anderen Vorschlag.</div>';
   }
@@ -737,6 +775,7 @@ async function loadDealers() {
         document.querySelectorAll('.slot.active, .dealer.active').forEach(x => x.classList.remove('active'));
         b.classList.add('active'); box.classList.add('active');
         state.dealer = d; state.slot = s;
+        updateSummary();
       };
       box.querySelector('.slots').append(b);
     });
@@ -746,13 +785,17 @@ async function loadDealers() {
 
 async function book() {
   const vorname = $('#vorname').value.trim();
-  if (!state.slot) return toast('Bitte wähle einen Termin');
-  if (!vorname) return toast('Bitte gib deinen Vornamen ein');
+  const nachname = $('#nachname').value.trim();
+  if (!vorname || !nachname) {
+    toast('Bitte gib Vor- und Nachnamen ein');
+    return (vorname ? $('#nachname') : $('#vorname')).focus();
+  }
+  if (!state.slot) return toast('Bitte wähle einen CUPRA-Partner und einen Termin');
   $('#book-btn').disabled = true;
   try {
     await state.missionRequest; // make sure the plan is included when the booking is sent
     const b = await api('/api/bookings', {
-      car_id: state.car.id, dealer_id: state.dealer.id, slot: state.slot.id, vorname,
+      car_id: state.car.id, dealer_id: state.dealer.id, slot: state.slot.id, vorname, nachname,
       consent: $('#consent').checked, profile: state.profile, mission: state.mission });
     renderTicket(b);
     show('v-ticket');
@@ -775,7 +818,7 @@ function renderTicket(b) {
         <div><span>Modell</span><b>${esc(b.auto)}</b></div>
         <div><span>Partner</span><b>${esc(b.haendler)}</b></div>
         <div><span>Adresse</span><b>${esc(b.adresse)}</b></div>
-        <div><span>Name</span><b>${esc(b.vorname)}</b></div>
+        <div><span>Name</span><b>${esc(b.vorname)} ${esc(b.nachname || '')}</b></div>
         <div><span>Kurzprofil</span><b>${b.profil_freigabe ? 'geteilt ✓' : 'nicht geteilt'}</b></div>
       </div>
     </div>`;

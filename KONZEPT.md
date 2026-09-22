@@ -20,7 +20,7 @@ Junge Autokäufer finden per **Antipp-Quiz** in zwei Minuten passende Modelle **
 2. **Antipp-Quiz (≈ 30 Sek.):** 6 Fragen mit grossen Kacheln zu Alltag, Budget (Schieberegler), Parken, Laden, Mitfahrern und dem, was man bei der Probefahrt klären will. Keine Tipparbeit.
 3. **Vorschläge:** Fahrprofil und passende Modelle mit „Match-%“, Begründung und Verbrauchsangaben
 4. **Probefahrt buchen:** Modell wählen; dazu entsteht ein persönlicher Probefahrt-Plan (Checkliste)
-5. **Buchen:** Händler in der Nähe und Termin wählen, Vorname eingeben, Zustimmung zum Kurzprofil geben. Dann gibt es ein Ticket mit QR-Code.
+5. **Buchen:** Händler in der Nähe und Termin wählen, Vor- und Nachname eingeben, Zustimmung zum Kurzprofil geben. Dann gibt es ein Ticket mit QR-Code.
 6. **Meet:** Der Berater scannt beim Händler den QR-Code. Damit ist die Probefahrt **qualifiziert** und wird abgerechnet.
 
 ## MVP (Online-Prototyp)
@@ -164,7 +164,7 @@ Wir möchten, dass Menschen ein Auto mit einem guten Gefühl und einer nachvollz
 | „Die KI erfindet falsche Daten“ | Modelldaten kommen nur aus der geprüften Datenbank. Die KI formuliert, rechnet aber nicht mit erfundenen Werten. |
 | Händler bestätigen Check-ins nicht, um Gebühren zu sparen | Der Kunde bestätigt die Fahrt ebenfalls per Feedback. Abweichungen werden sichtbar. |
 | Zu wenig Händler, um alle Marken abzudecken | Matches ohne Händler in der Nähe werden gekennzeichnet. Das Gebiet wird gezielt aufgebaut, zuerst dicht in einer Region. |
-| Datenschutz | Nur Vorname und Profil, Weitergabe nur mit Zustimmung, KI auf eigener Infrastruktur |
+| Datenschutz | Nur Vor- und Nachname und Profil, Weitergabe nur mit Zustimmung, KI auf eigener Infrastruktur |
 
 ## Pitch-Gerüst (5 Minuten)
 1. **Hook (30 s):** „Wer von euch hat schon mal eine Probefahrt gemacht und danach genauso wenig gewusst wie vorher?“

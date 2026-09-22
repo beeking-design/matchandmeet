@@ -220,8 +220,8 @@ function showCode(name, code) {
 
 async function loadBookings() {
   const { bookings } = await api('/api/admin/bookings');
-  table($('#booking-table'), ['Termin', 'Garage', 'Auto', 'Vorname', 'Code', 'Status', 'Gebühr', 'Gebucht am', ''],
-    bookings.map(b => `<tr><td>${esc(b.slot_label)}</td><td>${esc(b.haendler)}</td><td>${esc(b.auto)}</td><td>${esc(b.vorname)}</td>
+  table($('#booking-table'), ['Termin', 'Garage', 'Auto', 'Name', 'Code', 'Status', 'Gebühr', 'Gebucht am', ''],
+    bookings.map(b => `<tr><td>${esc(b.slot_label)}</td><td>${esc(b.haendler)}</td><td>${esc(b.auto)}</td><td>${esc(b.vorname)} ${esc(b.nachname || '')}</td>
       <td><code>${esc(b.code)}</code></td><td><span class="pill ${b.status === 'qualifiziert' ? 'ok' : ''}">${esc(b.status)}</span></td>
       <td>${b.fee_chf ? chf(b.fee_chf) : '–'}</td><td>${esc(b.created.replace('T', ' '))}</td>
       <td><button class="btn small danger" data-del-booking="${esc(b.code)}" data-label="${esc(b.vorname)}, ${esc(b.auto)}">Löschen</button></td></tr>`));
